@@ -106,12 +106,15 @@ means = mean(valid_b,1);
 sems = std(valid_b,[],1)./sqrt(size(valid_b,1));
 
 categorynames = getFlocCategoryNames('all');
-populateBars(means,sems,categorynames,handles);
+
+% Update internal data fields
 handles.vertmask = vertmask;
 handles.layer = hdata.layer;
 handles.HRF = hdata.HRF;
+handles.ylims = get_ylims(hdata);
 guidata(hObject,handles);
 
+populateBars(means,sems,categorynames,handles);
 
 % --- Outputs from this function are returned to the command line.
 function varargout = roi_bar_gui_OutputFcn(hObject, eventdata, handles) 
@@ -123,6 +126,38 @@ function varargout = roi_bar_gui_OutputFcn(hObject, eventdata, handles)
 % Get default command line output from handles structure
 varargout{1} = handles.output;
 
+function ylims = get_ylims(hdata)
+	verticesStruct = spherelookup_image2vert(hdata.roi,hdata.L);
+	vertices = verticesStruct.data;
+	vertmask = vertices > 0;
+
+	maxVal = -1000;
+	minVal = 1000;
+	hrf_strs = {'BETAS_OPT','BETAS_IC1','BETAS_IC2'};
+	for layer = 1:6
+		for hrf = 1:3
+		
+			betas = hdata.(hrf_strs{hrf}){layer};
+
+			roi = betas(vertmask,:);
+			roimean = mean(roi,1);
+		
+			tmp_max = max(roimean(:));
+			tmp_min = min(roimean(:));
+
+			if (tmp_max > maxVal)
+				maxVal = tmp_max;
+			end
+
+			if (tmp_min < minVal)
+				minVal = tmp_min;
+			end
+		end
+	end
+	minVal
+	maxVal
+
+	ylims = [minVal*0.8 maxVal/0.8];	
 
 function update_axes(handles)
     h = findobj('Tag','maingui');
@@ -159,7 +194,7 @@ function populateBars(means,sems,names,handles)
     errorbar(1:N,means,sems,'k.');
     legend(names);
     ylabel('Beta');
-    ylim([-1 10]);
+    ylim(handles.ylims);
     set(gca,'XTickLabel',{[]});
     hold off;
  
