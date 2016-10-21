@@ -154,8 +154,6 @@ function ylims = get_ylims(hdata)
 			end
 		end
 	end
-	minVal
-	maxVal
 
 	ylims = [minVal*0.8 maxVal/0.8];	
 

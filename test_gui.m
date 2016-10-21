@@ -22,7 +22,7 @@ function varargout = test_gui(varargin)
 
 % Edit the above text to modify the response to help test_gui
 
-% Last Modified by GUIDE v2.5 19-Oct-2016 15:47:41
+% Last Modified by GUIDE v2.5 20-Oct-2016 19:26:00
 
 % Begin initialization code - DO NOT EDIT
 gui_Singleton = 1;
@@ -298,7 +298,7 @@ function update_axes(handles)
 
 	metricNum = get(handles.metricdrop,'Value');
 	metrics = get(handles.metricdrop,'String');
-    	metric = metrics{metricNum};
+	metric = metrics{metricNum};
 
 	colormapNum = get(handles.colordrop,'Value');
 	colormaps = get(handles.colordrop,'String');
@@ -319,13 +319,27 @@ function update_axes(handles)
 
 	[im, ~] = makeFigs(sub,b,s,metric,cmap,contrast, thresh, tmax, handles.L, handles.layer, handles.S, handles.HRF);
 
-
 	axes(handles.brainax);
+	if ~isempty(handles.roi)
+		if (~isempty(handles.perim))
+			% dilate border to make it easier to see
+			tmp = imdilate(handles.perim,strel('disk',1));
+			r = im(:,:,1);
+			g = im(:,:,2);
+			b = im(:,:,3);
+			r(tmp) = 0;
+			g(tmp) = 0;
+			b(tmp) = 0;
+			im(:,:,1) = r;
+			im(:,:,2) = g;
+			im(:,:,3) = b;
+		end
+	end
 	imshow(im);
 	hold on;
 	% if roi exists, merge roi
 	if ~isempty(handles.roi)
-		hp = plot(handles.roix,handles.roiy,'k.-','MarkerSize',5,'LineWidth',3);	
+		hp = plot(handles.roix,handles.roiy,'k.-','MarkerSize',5,'LineWidth',3);
 	end
 	colormap(eval([cmap, '(', num2str(tmax), ')']));
 	hc = colorbar;
@@ -471,6 +485,7 @@ function roiButton_Callback(hObject, eventdata, handles)
 handles.roi = [];
 handles.roix = [];
 handles.roiy = [];
+handles.perim = [];
 update_axes(handles);
 
 %focus on the figure axes
@@ -485,6 +500,7 @@ guidata(hObject,handles);
 update_axes(handles);
 set(handles.clearroiButton,'enable','on');
 set(handles.analyzeroiButton,'enable','on');
+set(handles.shrinkButton,'enable','on');
 
 % draw ROI on surface until next time button is clicked
 
@@ -541,6 +557,7 @@ handles.roix = [];
 handles.roiy = [];
 guidata(hObject,handles);
 set(handles.analyzeroiButton,'enable','off');
+set(handles.shrinkButton,'enable','off');
 set(hObject,'enable','off');
 update_axes(handles);
 
@@ -556,6 +573,60 @@ set(hObject,'enable','off');
 % --- Executes during object creation, after setting all properties.
 function clearroiButton_CreateFcn(hObject, eventdata, handles)
 % hObject    handle to clearroiButton (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    empty - handles not created until after all CreateFcns called
+set(hObject,'enable','off');
+
+
+% --- Executes on button press in shrinkButton.
+function shrinkButton_Callback(hObject, eventdata, handles)
+% hObject    handle to shrinkButton (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+
+
+layer = str2num(handles.layer);
+switch handles.HRF
+    case ''
+        b = handles.BETAS_OPT{layer};
+        se = handles.SE_OPT{layer};
+    case 'IC1'
+        b = handles.BETAS_IC1{layer};
+        se = handles.SE_IC1{layer};
+    case 'IC2'
+        b = handles.BETAS_IC2{layer};
+        se = handles.SE_IC2{layer};
+end
+thresh = str2num(get(handles.threshField,'string'));
+
+contrastNum = get(handles.contrastDrop,'Value');
+contrasts = get(handles.contrastDrop,'String');
+contrast = contrasts{contrastNum};
+
+metricNum = get(handles.metricdrop,'Value');
+metrics = get(handles.metricdrop,'String');
+metric = metrics{metricNum};
+
+valid_func_vertices = getValidFuncVertices(b,se,metric,contrast,thresh);
+
+rL = handles.L{1};
+lL = handles.L{2};
+
+valstruct = struct('data',valid_func_vertices,'numrh',rL.vertsN,'numlh',lL.vertsN);
+validpx = spherelookup_vert2image(valstruct,handles.L,0);
+roi = handles.roi;
+overlap = roi .* validpx;
+handles.roi = overlap;
+handles.perim = bwperim(overlap);
+handles.roix = [];
+handles.roiy = [];
+guidata(hObject,handles);
+update_axes(handles);
+
+
+% --- Executes during object creation, after setting all properties.
+function shrinkButton_CreateFcn(hObject, eventdata, handles)
+% hObject    handle to shrinkButton (see GCBO)
 % eventdata  reserved - to be defined in a future version of MATLAB
 % handles    empty - handles not created until after all CreateFcns called
 set(hObject,'enable','off');
