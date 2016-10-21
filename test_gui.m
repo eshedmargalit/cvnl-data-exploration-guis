@@ -22,7 +22,7 @@ function varargout = test_gui(varargin)
 
 % Edit the above text to modify the response to help test_gui
 
-% Last Modified by GUIDE v2.5 20-Oct-2016 19:26:00
+% Last Modified by GUIDE v2.5 21-Oct-2016 14:05:02
 
 % Begin initialization code - DO NOT EDIT
 gui_Singleton = 1;
@@ -363,8 +363,8 @@ function update_axes(handles)
 	end
 	imshow(im);
 	hold on;
-	% if roi exists, merge roi
-	if ~isempty(handles.roi)
+	% if roi exists but the perimeter hasn't been set (i.e., no shrinkwrapping) then draw bounding box
+	if ~isempty(handles.roi) && isempty(handles.perim)
 		hp = plot(handles.roix,handles.roiy,'k.-','MarkerSize',5,'LineWidth',3);
 	end
 	colormap(eval([cmap, '(', num2str(100), ')']));
@@ -658,3 +658,18 @@ function shrinkButton_CreateFcn(hObject, eventdata, handles)
 % eventdata  reserved - to be defined in a future version of MATLAB
 % handles    empty - handles not created until after all CreateFcns called
 set(hObject,'enable','off');
+
+
+% --- Executes on button press in saveroiButton.
+function saveroiButton_Callback(hObject, eventdata, handles)
+% hObject    handle to saveroiButton (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+roi = handles.roi;
+roix = handles.roix;
+roiy = handles.roiy;
+perim = handles.perim;
+mkdirquiet('rois');
+[sfile,spath] = uiputfile('rois/*.mat','Save ROI');
+outname = [spath sfile];
+save(outname,'roi','roix','roiy','perim');
