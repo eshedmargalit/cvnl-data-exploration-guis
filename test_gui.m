@@ -22,7 +22,7 @@ function varargout = test_gui(varargin)
 
 % Edit the above text to modify the response to help test_gui
 
-% Last Modified by GUIDE v2.5 21-Oct-2016 14:20:29
+% Last Modified by GUIDE v2.5 21-Oct-2016 14:31:45
 
 % Begin initialization code - DO NOT EDIT
 gui_Singleton = 1;
@@ -683,3 +683,22 @@ function saveroiButton_CreateFcn(hObject, eventdata, handles)
 % eventdata  reserved - to be defined in a future version of MATLAB
 % handles    empty - handles not created until after all CreateFcns called
 set(hObject,'enable','off');
+
+
+% --- Executes on button press in roiloadbutton.
+function roiloadbutton_Callback(hObject, eventdata, handles)
+% hObject    handle to roiloadbutton (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+[fname,pathname] = uigetfile('rois/*.mat','Load ROI');
+x = load([pathname,fname]);
+handles.roi = x.roi;
+handles.roix = x.roix;
+handles.roiy = x.roiy;
+handles.perim = x.perim;
+guidata(hObject,handles);
+update_axes(handles);
+set(handles.clearroiButton,'enable','on');
+set(handles.analyzeroiButton,'enable','on');
+set(handles.shrinkButton,'enable','on');
+set(handles.saveroiButton,'enable','on');
