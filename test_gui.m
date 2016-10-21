@@ -22,7 +22,7 @@ function varargout = test_gui(varargin)
 
 % Edit the above text to modify the response to help test_gui
 
-% Last Modified by GUIDE v2.5 21-Oct-2016 14:05:02
+% Last Modified by GUIDE v2.5 21-Oct-2016 14:20:29
 
 % Begin initialization code - DO NOT EDIT
 gui_Singleton = 1;
@@ -529,6 +529,7 @@ update_axes(handles);
 set(handles.clearroiButton,'enable','on');
 set(handles.analyzeroiButton,'enable','on');
 set(handles.shrinkButton,'enable','on');
+set(handles.saveroiButton,'enable','on');
 
 % draw ROI on surface until next time button is clicked
 
@@ -586,6 +587,7 @@ handles.roiy = [];
 guidata(hObject,handles);
 set(handles.analyzeroiButton,'enable','off');
 set(handles.shrinkButton,'enable','off');
+set(handles.saveroiButton,'enable','off');
 set(hObject,'enable','off');
 update_axes(handles);
 
@@ -673,3 +675,11 @@ mkdirquiet('rois');
 [sfile,spath] = uiputfile('rois/*.mat','Save ROI');
 outname = [spath sfile];
 save(outname,'roi','roix','roiy','perim');
+
+
+% --- Executes during object creation, after setting all properties.
+function saveroiButton_CreateFcn(hObject, eventdata, handles)
+% hObject    handle to saveroiButton (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    empty - handles not created until after all CreateFcns called
+set(hObject,'enable','off');
