@@ -22,7 +22,7 @@ function varargout = test_gui(varargin)
 
 % Edit the above text to modify the response to help test_gui
 
-% Last Modified by GUIDE v2.5 21-Oct-2016 14:31:45
+% Last Modified by GUIDE v2.5 21-Oct-2016 17:50:36
 
 % Begin initialization code - DO NOT EDIT
 gui_Singleton = 1;
@@ -76,9 +76,14 @@ handles.SE_IC2 = cell(6,1);
 datadir = '/home/stone-ext1/fmridata/20160212-ST001-E002';
 resultsdir = sprintf('%s/glmdenoise_results',datadir);
 subject = 'C0041';
-layers = {'1','2','3','4','5','6'};
+experiment = 'floc';
+handles.categorynames = get_conditions(experiment);
+handles.contrast = 'placesVSall';
+set(handles.contrast_post,'String',handles.contrast);
+[con1,con2] = getCon1Con2(handles.contrast);
 
 % Preload data from all layers and save it in handles
+layers = {'1','2','3','4','5','6'};
 for layer = 1:6
 	[handles.BETAS_OPT{layer}, handles.SE_OPT{layer}] = init_fields(resultsdir, '',1:10, layers{layer});
 	[handles.BETAS_IC1{layer}, handles.SE_IC1{layer}] = init_fields(resultsdir, '_IC12',1:10, layers{layer});
@@ -86,7 +91,7 @@ for layer = 1:6
 end
 
 % For layer 1 (the default load) compute t-stat (default metric)
-tstats = compute_glm_metric(handles.BETAS_OPT{1},handles.SE_OPT{1},[5 6],[],'tstat',2);
+tstats = compute_glm_metric(handles.BETAS_OPT{1},handles.SE_OPT{1},con1,con2,'tstat',2);
 metricmax = max(tstats);
 metricmin = min(tstats);
 
@@ -95,7 +100,7 @@ set(handles.threshField,'string',metricmin);
 
 
 % Generate default image (faces tstat layer1 optimized HRF)
-[im, handles.L, handles.S] = makeFigs(subject,handles.BETAS_OPT{1},handles.SE_OPT{1},'tstat','hot','faces',metricmin,metricmax,[],'1', [],'');
+[im, handles.L, handles.S] = makeFigs(subject,handles.BETAS_OPT{1},handles.SE_OPT{1},'tstat','hot',con1,con2,metricmin,metricmax,[],'1', [],'');
 
 % Switch focus to brainax, show image
 axes(handles.brainax);
@@ -110,7 +115,7 @@ hc = colorbar;
 ylim(hc,[metricmin,metricmax]);
 hcImg = findobj(hc,'type','image');
 set(hcImg,'YData',[metricmin,metricmax]);
-ylabel(hc, 't-stat');
+ylabel(hc, 'tstat');
 hold off;
 
 % Set defaults as handles fields to grab them easily later on
@@ -186,33 +191,6 @@ function pushbutton1_Callback(hObject, eventdata, handles)
 % eventdata  reserved - to be defined in a future version of MATLAB
 % handles    structure with handles and user data (see GUIDATA)
 update_axes(handles);
-
-
-% --- Executes on selection change in contrastDrop.
-function contrastDrop_Callback(hObject, eventdata, handles)
-% hObject    handle to contrastDrop (see GCBO)
-% eventdata  reserved - to be defined in a future version of MATLAB
-% handles    structure with handles and user data (see GUIDATA)
-update_axes(handles);
-
-% Hints: contents = cellstr(get(hObject,'String')) returns contrastDrop contents as cell array
-%        contents{get(hObject,'Value')} returns selected item from contrastDrop
-
-
-% --- Executes during object creation, after setting all properties.
-function contrastDrop_CreateFcn(hObject, eventdata, handles)
-% hObject    handle to contrastDrop (see GCBO)
-% eventdata  reserved - to be defined in a future version of MATLAB
-% handles    empty - handles not created until after all CreateFcns called
-
-% Hint: popupmenu controls usually have a white background on Windows.
-%       See ISPC and COMPUTER.
-set(hObject,'Value',3);
-
-if ispc && isequal(get(hObject,'BackgroundColor'), get(0,'defaultUicontrolBackgroundColor'))
-    set(hObject,'BackgroundColor','white');
-end
-
 
 % --- Executes during object creation, after setting all properties.
 function brainax_CreateFcn(hObject, eventdata, handles)
@@ -290,11 +268,7 @@ function savebutton_Callback(hObject, eventdata, handles)
 % hObject    handle to savebutton (see GCBO)
 % eventdata  reserved - to be defined in a future version of MATLAB
 % handles    structure with handles and user data (see GUIDATA)
-contrastNum = get(handles.contrastDrop,'Value');
-contrasts = {'characters','bodies','faces','places','objects','word',...
-    'number','body','limb','adult','child','corridor','house','car', ...
-    'instrument'};
-contrast = contrasts{contrastNum};
+contrast = handles.contrast;
 thresh = get(handles.threshField,'string');
 tmax = get(handles.tmax,'string');
 if (isempty(handles.HRF))
@@ -318,9 +292,8 @@ function update_axes(handles)
 	thresh = str2num(get(handles.threshField,'string'));
 	tmax = str2num(get(handles.tmax,'string'));
 
-	contrastNum = get(handles.contrastDrop,'Value');
-	contrasts = get(handles.contrastDrop,'String');
-	contrast = contrasts{contrastNum};
+	contrast = handles.contrast;
+	[con1,con2] = getCon1Con2(contrast);
 
 	metricNum = get(handles.metricdrop,'Value');
 	metrics = get(handles.metricdrop,'String');
@@ -343,7 +316,7 @@ function update_axes(handles)
 	    s = handles.SE_OPT{layerNum};
 	end
 
-	[im, ~,~] = makeFigs(sub,b,s,metric,cmap,contrast, thresh, tmax, handles.L, handles.layer, handles.S, handles.HRF);
+	[im, ~,~] = makeFigs(sub,b,s,metric,cmap,con1, con2, thresh, tmax, handles.L, handles.layer, handles.S, handles.HRF);
 
 	axes(handles.brainax);
 	if ~isempty(handles.roi)
@@ -629,15 +602,14 @@ switch handles.HRF
 end
 thresh = str2num(get(handles.threshField,'string'));
 
-contrastNum = get(handles.contrastDrop,'Value');
-contrasts = get(handles.contrastDrop,'String');
-contrast = contrasts{contrastNum};
+contrast = handles.contrast;
+[con1,con2] = getCon1Con2(contrast);
 
 metricNum = get(handles.metricdrop,'Value');
 metrics = get(handles.metricdrop,'String');
 metric = metrics{metricNum};
 
-valid_func_vertices = getValidFuncVertices(b,se,metric,contrast,thresh);
+valid_func_vertices = getValidFuncVertices(b,se,metric,con1,con2,thresh);
 
 rL = handles.L{1};
 lL = handles.L{2};
@@ -702,3 +674,15 @@ set(handles.clearroiButton,'enable','on');
 set(handles.analyzeroiButton,'enable','on');
 set(handles.shrinkButton,'enable','on');
 set(handles.saveroiButton,'enable','on');
+
+
+% --- Executes on button press in contrastSelectorButton.
+function contrastSelectorButton_Callback(hObject, eventdata, handles)
+% hObject    handle to contrastSelectorButton (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+% for now hardcode to faces_vs_all
+% TODO:make this dynamic
+handles.contrast = 'facesVSall';
+set(handles.contrast_post,'String',handles.contrast);
+update_axes(handles);

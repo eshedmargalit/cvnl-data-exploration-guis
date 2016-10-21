@@ -1,7 +1,4 @@
-function [rgbimg, L, S] = makeFigs(sub, betas, se, viewmetric, cmap, contrastName, metric_min, metric_max, L, layer, S, HRF)
-
-% Assign contrast 1 based on lowercase input
-con1 = getCon(lower(contrastName));
+function [rgbimg, L, S] = makeFigs(sub, betas, se, viewmetric, cmap, con1, con2, metric_min, metric_max, L, layer, S, HRF)
 
 % Get correct HRF string for results directory based on input
 if (~isempty(HRF))
@@ -28,7 +25,7 @@ else
 end
 
 % setup image params
-metric = compute_glm_metric(betas,se,con1,[],viewmetric,2);
+metric = compute_glm_metric(betas,se,con1,con2,viewmetric,2);
 dataStruct = struct('data',metric,'numlh',numlh,'numrh',numrh);
 thresh = metric > metric_min;
 clim = [metric_min metric_max];
@@ -39,41 +36,3 @@ if (isempty(S)) % first call to func
 	S = fillstruct(numlh,numrh,viewpt);
 end
 end %end fx
-
-function con = getCon(contrastName)
-	contrastName = lower(contrastName);
-	switch contrastName
-		case 'characters'
-			con = [1 2];
-		case 'bodies'
-			con = [3 4];
-		case 'faces'
-			con = [5 6];
-		case 'places'
-			con = [7 8];
-		case 'objects'
-			con = [9 10];
-		case 'word'
-			con = [1];
-		case 'number'
-			con = [2];
-		case 'body'
-			con = [3];
-		case 'limb'
-			con = [4];
-		case 'adult'
-			con = [5];
-		case 'child'
-			con = [6];
-		case 'corridor'
-			con = [7];
-		case 'house'
-			con = [8];
-		case 'car'
-			con = [9];
-		case 'instrument'
-			con = [10];
-		otherwise
-			error(sprintf('%s not recognized. Please choose from:\ncharacters\nbodies\nfaces\nplaces\nobjects\nword\nnumber\nbody\nlimb\nadult\nchild\ncorridor\nhouse\ncar\ninstrument',contrastName));
-	end
-end
