@@ -61,6 +61,10 @@ guidata(hObject, handles);
 % UIWAIT makes test_gui wait for user response (see UIRESUME)
 % uiwait(handles.maingui);
 
+% Start custom code here
+%-----------------------%
+
+% set up empty cells (one for each layer) for betas and se for each of the three HRFs
 handles.BETAS_OPT = cell(6,1);
 handles.SE_OPT = cell(6,1);
 handles.BETAS_IC1 = cell(6,1);
@@ -68,31 +72,53 @@ handles.SE_IC1 = cell(6,1);
 handles.BETAS_IC2 = cell(6,1);
 handles.SE_IC2 = cell(6,1);
 
-
+% set the data directory, results directory, and subject ID (from freesurfer)
 datadir = '/home/stone-ext1/fmridata/20160212-ST001-E002';
 resultsdir = sprintf('%s/glmdenoise_results',datadir);
-
+subject = 'C0041';
 layers = {'1','2','3','4','5','6'};
+
+% Preload data from all layers and save it in handles
 for layer = 1:6
-
-[handles.BETAS_OPT{layer}, handles.SE_OPT{layer}] = init_fields(resultsdir, '',1:10, layers{layer});
-[handles.BETAS_IC1{layer}, handles.SE_IC1{layer}] = init_fields(resultsdir, '_IC12',1:10, layers{layer});
-[handles.BETAS_IC2{layer}, handles.SE_IC2{layer}] = init_fields(resultsdir, '_IC12',11:20, layers{layer});
-
+	[handles.BETAS_OPT{layer}, handles.SE_OPT{layer}] = init_fields(resultsdir, '',1:10, layers{layer});
+	[handles.BETAS_IC1{layer}, handles.SE_IC1{layer}] = init_fields(resultsdir, '_IC12',1:10, layers{layer});
+	[handles.BETAS_IC2{layer}, handles.SE_IC2{layer}] = init_fields(resultsdir, '_IC12',11:20, layers{layer});
 end
-[im, handles.L, handles.S] = makeFigs('C0041',handles.BETAS_OPT{1},handles.SE_OPT{1},'tstat','hot','faces',3,10,[],'1', [],'');
+
+% For layer 1 (the default load) compute t-stat (default metric)
+tstats = compute_glm_metric(handles.BETAS_OPT{1},handles.SE_OPT{1},[5 6],[],'tstat',2);
+metricmax = max(tstats);
+metricmin = min(tstats);
+
+set(handles.tmax,'string',metricmax);
+set(handles.threshField,'string',metricmin);
+
+
+% Generate default image (faces tstat layer1 optimized HRF)
+[im, handles.L, handles.S] = makeFigs(subject,handles.BETAS_OPT{1},handles.SE_OPT{1},'tstat','hot','faces',metricmin,metricmax,[],'1', [],'');
+
+% Switch focus to brainax, show image
 axes(handles.brainax);
 imshow(im);
 hold on;
-colormap(hot(10));
+
+% Create colorbar (default is hot) with 100 colors
+colormap(hot(100));
 hc = colorbar;
+
+% Explicity set display limits to those in GUI
+ylim(hc,[metricmin,metricmax]);
+hcImg = findobj(hc,'type','image');
+set(hcImg,'YData',[metricmin,metricmax]);
 ylabel(hc, 't-stat');
-ylim(hc,[3,10]);
 hold off;
 
+% Set defaults as handles fields to grab them easily later on
 handles.layer = '1';
 handles.HRF = '';
 handles.roi = [];
+
+% Update handles var for later use
 guidata(hObject, handles);
 
 
@@ -317,7 +343,7 @@ function update_axes(handles)
 	    s = handles.SE_OPT{layerNum};
 	end
 
-	[im, ~] = makeFigs(sub,b,s,metric,cmap,contrast, thresh, tmax, handles.L, handles.layer, handles.S, handles.HRF);
+	[im, ~,~] = makeFigs(sub,b,s,metric,cmap,contrast, thresh, tmax, handles.L, handles.layer, handles.S, handles.HRF);
 
 	axes(handles.brainax);
 	if ~isempty(handles.roi)
@@ -341,10 +367,12 @@ function update_axes(handles)
 	if ~isempty(handles.roi)
 		hp = plot(handles.roix,handles.roiy,'k.-','MarkerSize',5,'LineWidth',3);
 	end
-	colormap(eval([cmap, '(', num2str(tmax), ')']));
+	colormap(eval([cmap, '(', num2str(100), ')']));
 	hc = colorbar;
 	ylabel(hc, metric);
 	ylim(hc,[thresh,tmax]);
+	hcImg = findobj(hc,'type','image');
+	set(hcImg,'YData',[thresh,tmax]);
 	hold off;
 
 	set(handles.maingui, 'pointer', 'arrow');

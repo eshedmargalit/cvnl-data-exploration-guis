@@ -11,7 +11,7 @@ else
 end
 
 % Set the colormap
-cmap = eval([cmap, '(', num2str(metric_max), ')']);
+cmap = eval([cmap, '(', num2str(100), ')']);
 
 % if cached values are passed in, use those. Otherwise, calculate from scratch
 if (isempty(S))
@@ -37,8 +37,6 @@ clim = [metric_min metric_max];
 [img, L, rgbimg] = cvnlookupimages(sub,dataStruct,{'rh','lh'},viewpt,L,'xyextent',[1 1],'surftype','inflated','imageres',1000,'overlayalpha',thresh,'cmap',cmap,'clim',clim, 'background', 'curv');
 if (isempty(S)) % first call to func
 	S = fillstruct(numlh,numrh,viewpt);
-else
-	S = [];
 end
 end %end fx
 
