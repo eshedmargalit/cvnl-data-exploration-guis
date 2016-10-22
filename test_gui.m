@@ -76,8 +76,8 @@ handles.SE_IC2 = cell(6,1);
 datadir = '/home/stone-ext1/fmridata/20160212-ST001-E002';
 resultsdir = sprintf('%s/glmdenoise_results',datadir);
 subject = 'C0041';
-experiment = 'floc';
-handles.categorynames = get_conditions(experiment);
+handles.experiment = 'floc';
+handles.categorynames = get_conditions(handles.experiment);
 handles.contrast = 'placesVSall';
 set(handles.contrast_post,'String',handles.contrast);
 [con1,con2] = getCon1Con2(handles.contrast);
@@ -268,7 +268,7 @@ function savebutton_Callback(hObject, eventdata, handles)
 % hObject    handle to savebutton (see GCBO)
 % eventdata  reserved - to be defined in a future version of MATLAB
 % handles    structure with handles and user data (see GUIDATA)
-contrast = handles.contrast;
+contrast = get(handles.contrast_post,'String');
 thresh = get(handles.threshField,'string');
 tmax = get(handles.tmax,'string');
 if (isempty(handles.HRF))
@@ -292,7 +292,7 @@ function update_axes(handles)
 	thresh = str2num(get(handles.threshField,'string'));
 	tmax = str2num(get(handles.tmax,'string'));
 
-	contrast = handles.contrast;
+	contrast = get(handles.contrast_post,'String');
 	[con1,con2] = getCon1Con2(contrast);
 
 	metricNum = get(handles.metricdrop,'Value');
@@ -602,7 +602,7 @@ switch handles.HRF
 end
 thresh = str2num(get(handles.threshField,'string'));
 
-contrast = handles.contrast;
+contrast = get(handles.contrast_post,'String');
 [con1,con2] = getCon1Con2(contrast);
 
 metricNum = get(handles.metricdrop,'Value');
@@ -681,8 +681,9 @@ function contrastSelectorButton_Callback(hObject, eventdata, handles)
 % hObject    handle to contrastSelectorButton (see GCBO)
 % eventdata  reserved - to be defined in a future version of MATLAB
 % handles    structure with handles and user data (see GUIDATA)
-% for now hardcode to faces_vs_all
-% TODO:make this dynamic
-handles.contrast = 'facesVSall';
-set(handles.contrast_post,'String',handles.contrast);
-update_axes(handles);
+contrast_selector_gui
+
+function update_contrast(hObject,eventdata,x,contrast,handles)
+	handles.contrast = contrast;
+	set(handles.contrast_post,'String',handles.contrast);
+	update_axes(handles);
