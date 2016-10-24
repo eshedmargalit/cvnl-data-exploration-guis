@@ -154,8 +154,10 @@ function ylims = get_ylims(hdata)
 			end
 		end
 	end
-
-	ylims = [minVal*0.8 maxVal/0.8];	
+	
+	% add a bit of a gap to top and bottom of graph-- set as 1x2 array where first value determines bottom gap and second value determines top gap
+	gapMultipliers = [0.3 0.1];
+	ylims = [minVal-(abs(minVal)*gapMultipliers(1)), maxVal + (abs(maxVal)*gapMultipliers(2))];	
 
 function update_axes(handles)
     h = findobj('Tag','maingui');
