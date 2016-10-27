@@ -1,4 +1,7 @@
 # Data Exploration Tools for CVNL 7T fMRI Data
 
-## Test GUI
-Run test_gui to visualize, interact with, and explore data
+## cvnlookup_gui 
+Provides an interface to explore functional data using the cvnlookupimages() function
+
+## cvnline_profiles_gui
+Provides wrapper code and interfaces to make line profile movies
