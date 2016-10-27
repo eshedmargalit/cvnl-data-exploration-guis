@@ -76,6 +76,9 @@ handles.SE_IC2 = cell(6,1);
 datadir = '/home/stone-ext1/fmridata/20160212-ST001-E002';
 resultsdir = sprintf('%s/glmdenoise_results',datadir);
 subject = 'C0041';
+
+set(handles.resultsdirField,'String',resultsdir);
+set(handles.subField, 'String',subject);
 handles.experiment = 'floc';
 handles.categorynames = get_conditions(handles.experiment);
 handles.contrast = 'placesVSall';
