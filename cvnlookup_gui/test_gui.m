@@ -126,7 +126,7 @@ handles.HRF = '';
 handles.roi = [];
 
 % Load mean bias corrected for each layer
-bias_struct = matfile([datadir, '/preprocessSURF/meanbiascorrected04.mat']);
+bias_struct = matfile(sprintf([datadir, '/preprocessVER1SURF%s/meanbiascorrected04.mat'],handles.subject));
 bias_data = permute(bias_struct.data,[3 1 2]);
 for layer = 1:6
     mean_bias_corrected{layer} = bias_data(:,1,layer);
@@ -323,7 +323,7 @@ function update_axes(handles)
     switch bg
         case 'curvature'
             bg = 'curv';
-        case 'bias-corrected mean EPI'
+        case 'mean EPI'
             bg = handles.bias_corrected_mean_epi{layerNum};
     end
     
@@ -499,7 +499,7 @@ function update_data_sources(handles)
     end
     
     % Load mean bias corrected for each layer
-    bias_struct = matfile([resultsdir, '../preprocessSURF/meanbiascorrected04.mat']);
+    bias_struct = matfile(sprintf([resultsdir, '../preprocessVER1SURF%s/meanbiascorrected04.mat'],handles.subject));
     bias_data = permute(bias_struct.data,[3 1 2]);
     for layer = 1:6
         mean_bias_corrected{layer} = bias_data(:,1,layer);
