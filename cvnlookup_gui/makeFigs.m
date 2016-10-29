@@ -1,4 +1,4 @@
-function [rgbimg, L, S] = makeFigs(sub, betas, se, viewmetric, cmap, con1, con2, metric_min, metric_max, L, layer, S, HRF)
+function [rgbimg, L, S] = makeFigs(sub, betas, se, viewmetric, cmap, con1, con2, metric_min, metric_max, L, layer, S, HRF, bg)
 
 % Get correct HRF string for results directory based on input
 if (~isempty(HRF))
@@ -31,7 +31,7 @@ thresh = metric > metric_min;
 clim = [metric_min metric_max];
 
 % draw image and create RGB
-[img, L, rgbimg] = cvnlookupimages(sub,dataStruct,{'rh','lh'},viewpt,L,'xyextent',[1 1],'surftype','inflated','imageres',1000,'overlayalpha',thresh,'cmap',cmap,'clim',clim, 'background', 'curv');
+[img, L, rgbimg] = cvnlookupimages(sub,dataStruct,{'rh','lh'},viewpt,L,'xyextent',[1 1],'surftype','inflated','imageres',1000,'overlayalpha',thresh,'cmap',cmap,'clim',clim, 'background', bg);
 if (isempty(S)) % first call to func
 	S = fillstruct(numlh,numrh,viewpt);
 end

@@ -22,7 +22,7 @@ function varargout = test_gui(varargin)
 
 % Edit the above text to modify the response to help test_gui
 
-% Last Modified by GUIDE v2.5 21-Oct-2016 17:50:36
+% Last Modified by GUIDE v2.5 28-Oct-2016 16:00:21
 
 % Begin initialization code - DO NOT EDIT
 gui_Singleton = 1;
@@ -74,24 +74,23 @@ handles.SE_IC2 = cell(6,1);
 
 % set the data directory, results directory, and subject ID (from freesurfer)
 datadir = '/home/stone-ext1/fmridata/20160212-ST001-E002';
-resultsdir = sprintf('%s/glmdenoise_results',datadir);
-subject = 'C0041';
+resultsdir = sprintf('%s/GLMCS_floc_assume/results',datadir);
+
+% Preload data from all layers and save it in handles
+layers = {'1','2','3','4','5','6'};
+for layer = 1:6
+	[handles.BETAS_OPT{layer}, handles.SE_OPT{layer}, handles.subject] = init_fields(resultsdir, '',1:10, layers{layer});
+	[handles.BETAS_IC1{layer}, handles.SE_IC1{layer},~] = init_fields(resultsdir, '_IC12',1:10, layers{layer});
+	[handles.BETAS_IC2{layer}, handles.SE_IC2{layer},~] = init_fields(resultsdir, '_IC12',1:10, layers{layer});
+	%[handles.BETAS_IC2{layer}, handles.SE_IC2{layer}] = init_fields(resultsdir, '_IC12',11:20, layers{layer});
+end
 
 set(handles.resultsdirField,'String',resultsdir);
-set(handles.subField, 'String',subject);
 handles.experiment = 'floc';
 handles.categorynames = get_conditions(handles.experiment);
 handles.contrast = 'placesVSall';
 set(handles.contrast_post,'String',handles.contrast);
 [con1,con2] = getCon1Con2(handles.contrast);
-
-% Preload data from all layers and save it in handles
-layers = {'1','2','3','4','5','6'};
-for layer = 1:6
-	[handles.BETAS_OPT{layer}, handles.SE_OPT{layer}] = init_fields(resultsdir, '',1:10, layers{layer});
-	[handles.BETAS_IC1{layer}, handles.SE_IC1{layer}] = init_fields(resultsdir, '_IC12',1:10, layers{layer});
-	[handles.BETAS_IC2{layer}, handles.SE_IC2{layer}] = init_fields(resultsdir, '_IC12',11:20, layers{layer});
-end
 
 % For layer 1 (the default load) compute t-stat (default metric)
 tstats = compute_glm_metric(handles.BETAS_OPT{1},handles.SE_OPT{1},con1,con2,'tstat',2);
@@ -103,7 +102,7 @@ set(handles.threshField,'string',metricmin);
 
 
 % Generate default image (faces tstat layer1 optimized HRF)
-[im, handles.L, handles.S] = makeFigs(subject,handles.BETAS_OPT{1},handles.SE_OPT{1},'tstat','hot',con1,con2,metricmin,metricmax,[],'1', [],'');
+[im, handles.L, handles.S] = makeFigs(handles.subject,handles.BETAS_OPT{1},handles.SE_OPT{1},'tstat','hot',con1,con2,metricmin,metricmax,[],'1', [],'','curv');
 
 % Switch focus to brainax, show image
 axes(handles.brainax);
@@ -125,6 +124,14 @@ hold off;
 handles.layer = '1';
 handles.HRF = '';
 handles.roi = [];
+
+% Load mean bias corrected for each layer
+bias_struct = matfile([datadir, '/preprocessSURF/meanbiascorrected04.mat']);
+bias_data = permute(bias_struct.data,[3 1 2]);
+for layer = 1:6
+    mean_bias_corrected{layer} = bias_data(:,1,layer);
+end
+handles.bias_corrected_mean_epi = mean_bias_corrected;
 
 % Update handles var for later use
 guidata(hObject, handles);
@@ -235,7 +242,7 @@ function uipanel3_SelectionChangeFcn(hObject, eventdata, handles)
 % handles    structure with handles and user data (see GUIDATA)
 str = get(eventdata.NewValue,'Tag');
 handles.HRF = str(6:end); %cut off 'radio'
-if strcmp(handles.HRF,'Optimized')
+if strcmp(handles.HRF,'Canonical')
     handles.HRF = '';
 end
 guidata(hObject, handles);
@@ -275,7 +282,7 @@ contrast = get(handles.contrast_post,'String');
 thresh = get(handles.threshField,'string');
 tmax = get(handles.tmax,'string');
 if (isempty(handles.HRF))
-    hrfstr = 'optimized';
+    hrfstr = 'canonical';
 else
     hrfstr = handles.HRF;
 end
@@ -291,7 +298,8 @@ imwrite(im,outname);
 function update_axes(handles)
 	set(handles.maingui, 'pointer', 'watch')
 	drawnow;
-	sub = get(handles.subField,'String');
+	
+	sub = handles.subject;
 	thresh = str2num(get(handles.threshField,'string'));
 	tmax = str2num(get(handles.tmax,'string'));
 
@@ -306,7 +314,18 @@ function update_axes(handles)
 	colormaps = get(handles.colordrop,'String');
 	cmap = colormaps{colormapNum};
 
-   	 layerNum = str2num(handles.layer);
+   	layerNum = str2num(handles.layer);
+    
+	backgroundNum = get(handles.backgroundDrop,'Value');
+	backgrounds = get(handles.backgroundDrop,'String');
+	bg = backgrounds{backgroundNum};
+    
+    switch bg
+        case 'curvature'
+            bg = 'curv';
+        case 'bias-corrected mean EPI'
+            bg = handles.bias_corrected_mean_epi{layerNum};
+    end
     
 	if strcmp(handles.HRF,'IC1')
 	    b = handles.BETAS_IC1{layerNum};
@@ -319,7 +338,7 @@ function update_axes(handles)
 	    s = handles.SE_OPT{layerNum};
 	end
 
-	[im, ~,~] = makeFigs(sub,b,s,metric,cmap,con1, con2, thresh, tmax, handles.L, handles.layer, handles.S, handles.HRF);
+	[im, ~,~] = makeFigs(sub,b,s,metric,cmap,con1, con2, thresh, tmax, handles.L, handles.layer, handles.S, handles.HRF, bg);
 
 	axes(handles.brainax);
 	if ~isempty(handles.roi)
@@ -478,6 +497,14 @@ function update_data_sources(handles)
     [handles.BETAS_IC2{layer}, handles.SE_IC2{layer}] = init_fields(resultsdir, '_IC12',11:20, layers{layer});
 
     end
+    
+    % Load mean bias corrected for each layer
+    bias_struct = matfile([resultsdir, '../preprocessSURF/meanbiascorrected04.mat']);
+    bias_data = permute(bias_struct.data,[3 1 2]);
+    for layer = 1:6
+        mean_bias_corrected{layer} = bias_data(:,1,layer);
+    end
+    handles.bias_corrected_mean_epi = mean_bias_corrected;
 
 
 % --- Executes on button press in roiButton.
@@ -690,3 +717,27 @@ function update_contrast(hObject,eventdata,x,contrast,handles)
 	handles.contrast = contrast;
 	set(handles.contrast_post,'String',handles.contrast);
 	update_axes(handles);
+
+
+% --- Executes on selection change in backgroundDrop.
+function backgroundDrop_Callback(hObject, eventdata, handles)
+% hObject    handle to backgroundDrop (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+
+% Hints: contents = cellstr(get(hObject,'String')) returns backgroundDrop contents as cell array
+%        contents{get(hObject,'Value')} returns selected item from backgroundDrop
+update_axes(handles);
+
+% --- Executes during object creation, after setting all properties.
+function backgroundDrop_CreateFcn(hObject, eventdata, handles)
+% hObject    handle to backgroundDrop (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    empty - handles not created until after all CreateFcns called
+
+% Hint: popupmenu controls usually have a white background on Windows.
+%       See ISPC and COMPUTER.
+set(hObject,'Value',1);
+if ispc && isequal(get(hObject,'BackgroundColor'), get(0,'defaultUicontrolBackgroundColor'))
+    set(hObject,'BackgroundColor','white');
+end

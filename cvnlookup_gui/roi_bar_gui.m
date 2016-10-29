@@ -22,7 +22,7 @@ function varargout = roi_bar_gui(varargin)
 
 % Edit the above text to modify the response to help roi_bar_gui
 
-% Last Modified by GUIDE v2.5 19-Oct-2016 17:49:34
+% Last Modified by GUIDE v2.5 29-Oct-2016 09:58:15
 
 % Begin initialization code - DO NOT EDIT
 gui_Singleton = 1;
@@ -91,20 +91,23 @@ vertmask = vertices > 0;
 switch hrf
         case '' 
                 b = hdata.BETAS_OPT{layer};
-                set(handles.Optimized,'Value',1);
+		se = hdata.SE_OPT{layer};
+                set(handles.Canonical,'Value',1);
         case 'IC1'
                 b = hdata.BETAS_IC1{layer};
+		se = hdata.SE_IC1{layer};
                 set(handles.IC1,'Value',1);
         case 'IC2'
                 b = hdata.BETAS_IC2{layer};
-                set(handles.IC2,'Value',2);
+		se = hdata.SE_IC2{layer};
+                set(handles.IC2,'Value',1);
 end
 
 valid_b = b(vertmask,:);
+valid_se = se(vertmask,:);
 
 means = mean(valid_b,1);
-sems = std(valid_b,[],1)./sqrt(size(valid_b,1));
-
+sems = mean(valid_se,1);
 categorynames = getFlocCategoryNames('all');
 
 % Update internal data fields
@@ -156,30 +159,37 @@ function ylims = get_ylims(hdata)
 	end
 	
 	% add a bit of a gap to top and bottom of graph-- set as 1x2 array where first value determines bottom gap and second value determines top gap
-	gapMultipliers = [0.3 0.1];
-	ylims = [minVal-(abs(minVal)*gapMultipliers(1)), maxVal + (abs(maxVal)*gapMultipliers(2))];	
+	gaps = [3 3];
+	ylims = [minVal-gaps(1), maxVal+gaps(2)];	
 
 function update_axes(handles)
-    h = findobj('Tag','maingui');
-    hdata = guidata(h);
-    layer = str2num(handles.layer);
-    hrf = handles.HRF;
-    switch hrf
-            case '' 
-                    b = hdata.BETAS_OPT{layer};
-            case 'IC1'
-                    b = hdata.BETAS_IC1{layer};
-            case 'IC2'
-                    b = hdata.BETAS_IC2{layer};
-    end
+	h = findobj('Tag','maingui');
+	hdata = guidata(h);
+	layer = str2num(handles.layer);
+	hrf = handles.HRF;
+	switch hrf
+		case ''
+			b = hdata.BETAS_OPT{layer};
+			se = hdata.SE_OPT{layer};
+			set(handles.Canonical,'Value',1);
+		case 'IC1'
+			b = hdata.BETAS_IC1{layer};
+			se = hdata.SE_IC1{layer};
+			set(handles.IC1,'Value',1);
+		case 'IC2'
+			b = hdata.BETAS_IC2{layer};
+			se = hdata.SE_IC2{layer};
+			set(handles.IC2,'Value',1);
+	end
 
-    valid_b = b(handles.vertmask,:);
+	valid_b = b(handles.vertmask,:);
+	valid_se = se(handles.vertmask,:);
 
-    means = mean(valid_b,1);
-    sems = std(valid_b,[],1)./sqrt(size(valid_b,1));
+	means = mean(valid_b,1);
+	sems = mean(valid_se,1);
 
-    categorynames = getFlocCategoryNames('all');
-    populateBars(means,sems,categorynames,handles);
+	categorynames = getFlocCategoryNames('all');
+	populateBars(means,sems,categorynames,handles);
 
 function populateBars(means,sems,names,handles)
     cla(handles.barax);
@@ -209,7 +219,7 @@ function uipanel5_SelectionChangeFcn(hObject, eventdata, handles)
 %	NewValue: handle of the currently selected object
 % handles    structure with handles and user data (see GUIDATA)
 handles.HRF = get(eventdata.NewValue,'Tag');
-if strcmp(handles.HRF,'Optimized')
+if strcmp(handles.HRF,'Canonical')
     handles.HRF = '';
 end
 guidata(hObject, handles);
