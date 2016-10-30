@@ -304,13 +304,15 @@ else
     hrfstr = handles.HRF;
 end
 
-
-defstring = sprintf('inflated_ventral_fLoc_%s_layer%s_HRF%s_t%s_%s.png',contrast, ...
-    handles.layer, hrfstr, thresh, tmax);
+defstring = sprintf('inflated_ventral_%s_%s_layer%s_HRF%s_t%s_%s.png', ...
+	handles.experiment, contrast, handles.layer, ...
+	hrfstr, thresh, tmax);
 [file,path] = uiputfile(defstring,'Save file name');
 outname = [path,file];
-im = export_fig(handles.brainax,'-a1');
-imwrite(im,outname);
+if (file)
+	im = export_fig(handles.brainax,'-a1');
+	imwrite(im,outname);
+end
 
 function L = update_axes(handles)
 	set(handles.maingui, 'pointer', 'watch')
@@ -729,10 +731,13 @@ roi = handles.roi;
 roix = handles.roix;
 roiy = handles.roiy;
 perim = handles.perim;
-mkdirquiet('rois');
-[sfile,spath] = uiputfile('rois/*.mat','Save ROI');
+sub_path = sprintf('ROIs/%s',handles.subject);
+mkdirquiet(sub_path);
+[sfile,spath] = uiputfile([sub_path, '/*.mat'],'Save ROI');
 outname = [spath sfile];
-save(outname,'roi','roix','roiy','perim');
+if (sfile)
+	save(outname,'roi','roix','roiy','perim');
+end
 
 
 % --- Executes during object creation, after setting all properties.
@@ -748,18 +753,21 @@ function roiloadbutton_Callback(hObject, eventdata, handles)
 % hObject    handle to roiloadbutton (see GCBO)
 % eventdata  reserved - to be defined in a future version of MATLAB
 % handles    structure with handles and user data (see GUIDATA)
-[fname,pathname] = uigetfile('rois/*.mat','Load ROI');
-x = load([pathname,fname]);
-handles.roi = x.roi;
-handles.roix = x.roix;
-handles.roiy = x.roiy;
-handles.perim = x.perim;
-guidata(hObject,handles);
-update_axes(handles);
-set(handles.clearroiButton,'enable','on');
-set(handles.analyzeroiButton,'enable','on');
-set(handles.shrinkButton,'enable','on');
-set(handles.saveroiButton,'enable','on');
+sub_path = sprintf('ROIs/%s',handles.subject);
+[fname,pathname] = uigetfile([sub_path,'/*.mat'],'Load ROI');
+if (fname)
+	x = load([pathname,fname]);
+	handles.roi = x.roi;
+	handles.roix = x.roix;
+	handles.roiy = x.roiy;
+	handles.perim = x.perim;
+	guidata(hObject,handles);
+	update_axes(handles);
+	set(handles.clearroiButton,'enable','on');
+	set(handles.analyzeroiButton,'enable','on');
+	set(handles.shrinkButton,'enable','on');
+	set(handles.saveroiButton,'enable','on');
+end
 
 
 % --- Executes on button press in contrastSelectorButton.
