@@ -521,8 +521,21 @@ for layer = 1:6
 end
 handles.bias_corrected_mean_epi = mean_bias_corrected;
 handles.subject = subject;
+
+% Clear subject specific fields
 handles.S = [];
 handles.L = [];
+
+% Clear ROI and its buttons
+handles.roi = [];
+handles.roix = [];
+handles.roiy = [];
+set(handles.analyzeroiButton,'enable','off');
+set(handles.shrinkButton,'enable','off');
+set(handles.saveroiButton,'enable','off');
+set(handles.clearroiButton,'enable','off');
+
+% Update brainax
 guidata(hObject,handles);
 L = update_axes(handles);
 handles.L = L;
