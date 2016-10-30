@@ -459,18 +459,34 @@ function dataBrowseButton_Callback(hObject, eventdata, handles)
 % hObject    handle to dataBrowseButton (see GCBO)
 % eventdata  reserved - to be defined in a future version of MATLAB
 % handles    structure with handles and user data (see GUIDATA)
+
+% Set the results directory based on Browse output
 str = uigetdir(cvnpath('fmridata'),'Choose GLM Results folder');
 set(handles.resultsdirField,'String',str);
 resultsdir = get(handles.resultsdirField,'String');
 
+% Load in data, use waitbar
+h = waitbar(0,'');
 layers = {'1','2','3','4','5','6'};
+
+total_loads = 18;
+idx = 1;
 for layer = 1:6
+	
+	waitbar(idx/total_loads, h, sprintf('Loading Layer %.0f, Canonical HRF',layer));
+	idx = idx + 1;
 	[handles.BETAS_OPT{layer}, handles.SE_OPT{layer}, subject] = init_fields(resultsdir, '',1:10, layers{layer});
+
+	waitbar(idx/total_loads, h, sprintf('Loading Layer %.0f, IC1',layer));
+	idx = idx + 1;
 	[handles.BETAS_IC1{layer}, handles.SE_IC1{layer},~] = init_fields(resultsdir, '_IC12',1:10, layers{layer});
+
+	waitbar(idx/total_loads, h, sprintf('Loading Layer %.0f, IC2',layer));
+	idx = idx + 1;
 	[handles.BETAS_IC2{layer}, handles.SE_IC2{layer},~] = init_fields(resultsdir, '_IC12',1:10, layers{layer});
 	%[handles.BETAS_IC2{layer}, handles.SE_IC2{layer}] = init_fields(resultsdir, '_IC12',11:20, layers{layer});
 end
-
+close(h);
 tstats = compute_glm_metric(handles.BETAS_OPT{1},handles.SE_OPT{1},[1 2],[],'tstat',2);
 metricmax = max(tstats);
 metricmin = min(tstats);
