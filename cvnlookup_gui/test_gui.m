@@ -22,7 +22,7 @@ function varargout = test_gui(varargin)
 
 % Edit the above text to modify the response to help test_gui
 
-% Last Modified by GUIDE v2.5 28-Oct-2016 16:00:21
+% Last Modified by GUIDE v2.5 30-Oct-2016 12:13:36
 
 % Begin initialization code - DO NOT EDIT
 gui_Singleton = 1;
@@ -72,23 +72,40 @@ handles.SE_IC1 = cell(6,1);
 handles.BETAS_IC2 = cell(6,1);
 handles.SE_IC2 = cell(6,1);
 
-% set the data directory, results directory, and subject ID (from freesurfer)
-datadir = '/home/stone-ext1/fmridata/20160212-ST001-E002';
-resultsdir = sprintf('%s/GLMCS_floc_assume/results',datadir);
+% get the data directory, results directory, and subject ID (freesurfer) from the init gui
+h = findobj('Tag','init_gui');
+init_handles = guidata(h);
+resultsdir = get(init_handles.resultsdirField,'String');
+sep_idx = strfind(resultsdir,'/');
+datadir = resultsdir(1:sep_idx(end-1)-1);
+
+% Get experiment info
+handles.experiment = init_handles.experiment;
 
 % Preload data from all layers and save it in handles
+h_wait = waitbar(0,'');
 layers = {'1','2','3','4','5','6'};
+
+total_loads = 18;
+idx = 1;
 for layer = 1:6
+	waitbar(idx/total_loads, h_wait, sprintf('Loading Layer %.0f, Canonical HRF',layer));
+	idx = idx + 1;
 	[handles.BETAS_OPT{layer}, handles.SE_OPT{layer}, handles.subject] = init_fields(resultsdir, '',1:10, layers{layer});
+
+	waitbar(idx/total_loads, h_wait, sprintf('Loading Layer %.0f, IC1',layer));
+	idx = idx + 1;
 	[handles.BETAS_IC1{layer}, handles.SE_IC1{layer},~] = init_fields(resultsdir, '_IC12',1:10, layers{layer});
+
+	waitbar(idx/total_loads, h_wait, sprintf('Loading Layer %.0f, IC2',layer));
+	idx = idx + 1;
 	[handles.BETAS_IC2{layer}, handles.SE_IC2{layer},~] = init_fields(resultsdir, '_IC12',1:10, layers{layer});
 	%[handles.BETAS_IC2{layer}, handles.SE_IC2{layer}] = init_fields(resultsdir, '_IC12',11:20, layers{layer});
 end
-
+close(h_wait);
 set(handles.resultsdirField,'String',resultsdir);
-handles.experiment = 'floc';
 handles.categorynames = get_conditions(handles.experiment);
-handles.contrast = 'placesVSall';
+handles.contrast = get(init_handles.contrastField,'String');
 set(handles.contrast_post,'String',handles.contrast);
 [con1,con2] = getCon1Con2(handles.contrast);
 
@@ -767,3 +784,13 @@ set(hObject,'Value',1);
 if ispc && isequal(get(hObject,'BackgroundColor'), get(0,'defaultUicontrolBackgroundColor'))
     set(hObject,'BackgroundColor','white');
 end
+
+
+% --- Executes when user attempts to close maingui.
+function maingui_CloseRequestFcn(hObject, eventdata, handles)
+% hObject    handle to maingui (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+
+% Hint: delete(hObject) closes the figure
+delete(hObject);

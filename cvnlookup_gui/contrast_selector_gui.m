@@ -61,10 +61,20 @@ guidata(hObject, handles);
 % uiwait(handles.contrast_selector_gui);
 
 h = findobj('Tag','maingui');
-hdata = guidata(h);
-handles.hdata = hdata;
-conditions = get_conditions(hdata.experiment);
-nConditions = numel(conditions);
+if (isempty(h))
+	h = findobj('Tag','init_gui');
+	hdata = guidata(h);
+	handles.hdata = hdata;
+	conditions = get_conditions(hdata.experiment);
+	nConditions = numel(conditions);
+	handles.mainIsOpen = 0;
+else
+	hdata = guidata(h);
+	handles.hdata = hdata;
+	conditions = get_conditions(hdata.experiment);
+	nConditions = numel(conditions);
+	handles.mainIsOpen = 1;
+end
 
 set(handles.listcon1,'String',conditions);
 
@@ -154,4 +164,10 @@ for i=2:length(con2_selected)
 end
 
 contrast = [con1str 'VS' con2str];
-test_gui('update_contrast',hObject,eventdata,handles,contrast,handles.hdata);
+if (handles.mainIsOpen)
+	test_gui('update_contrast',hObject,eventdata,handles,contrast,handles.hdata);
+else
+	initialization_gui('update_contrast',hObject,eventdata,handles,contrast,handles.hdata);
+end
+close(get(hObject,'Parent'));
+
