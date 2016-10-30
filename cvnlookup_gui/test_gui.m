@@ -295,7 +295,7 @@ outname = [path,file];
 im = export_fig(handles.brainax,'-a1');
 imwrite(im,outname);
 
-function update_axes(handles)
+function L = update_axes(handles)
 	set(handles.maingui, 'pointer', 'watch')
 	drawnow;
 	
@@ -320,12 +320,12 @@ function update_axes(handles)
 	backgrounds = get(handles.backgroundDrop,'String');
 	bg = backgrounds{backgroundNum};
     
-    switch bg
-        case 'curvature'
-            bg = 'curv';
-        case 'mean EPI'
-            bg = handles.bias_corrected_mean_epi{layerNum};
-    end
+	switch bg
+		case 'curvature'
+		    bg = 'curv';
+		case 'mean EPI'
+		    bg = handles.bias_corrected_mean_epi{layerNum};
+	end
     
 	if strcmp(handles.HRF,'IC1')
 	    b = handles.BETAS_IC1{layerNum};
@@ -338,7 +338,7 @@ function update_axes(handles)
 	    s = handles.SE_OPT{layerNum};
 	end
 
-	[im, ~,~] = makeFigs(sub,b,s,metric,cmap,con1, con2, thresh, tmax, handles.L, handles.layer, handles.S, handles.HRF, bg);
+	[im, L,~] = makeFigs(sub,b,s,metric,cmap,con1, con2, thresh, tmax, handles.L, handles.layer, handles.S, handles.HRF, bg);
 
 	axes(handles.brainax);
 	if ~isempty(handles.roi)
@@ -461,9 +461,39 @@ function dataBrowseButton_Callback(hObject, eventdata, handles)
 % handles    structure with handles and user data (see GUIDATA)
 str = uigetdir(cvnpath('fmridata'),'Choose GLM Results folder');
 set(handles.resultsdirField,'String',str);
-update_data_sources(handles);
-guidata(hObject,handles);
+resultsdir = get(handles.resultsdirField,'String');
 
+layers = {'1','2','3','4','5','6'};
+for layer = 1:6
+	[handles.BETAS_OPT{layer}, handles.SE_OPT{layer}, subject] = init_fields(resultsdir, '',1:10, layers{layer});
+	[handles.BETAS_IC1{layer}, handles.SE_IC1{layer},~] = init_fields(resultsdir, '_IC12',1:10, layers{layer});
+	[handles.BETAS_IC2{layer}, handles.SE_IC2{layer},~] = init_fields(resultsdir, '_IC12',1:10, layers{layer});
+	%[handles.BETAS_IC2{layer}, handles.SE_IC2{layer}] = init_fields(resultsdir, '_IC12',11:20, layers{layer});
+end
+
+tstats = compute_glm_metric(handles.BETAS_OPT{1},handles.SE_OPT{1},[1 2],[],'tstat',2);
+metricmax = max(tstats);
+metricmin = min(tstats);
+
+set(handles.tmax,'string',metricmax);
+set(handles.threshField,'string',metricmin);
+
+% Load mean bias corrected for each layer
+sep_idx = strfind(resultsdir,'/');
+datadir = resultsdir(1:sep_idx(end-1)-1);
+bias_struct = matfile(sprintf([datadir, '/preprocessVER1SURF%s/meanbiascorrected04.mat'],subject));
+bias_data = permute(bias_struct.data,[3 1 2]);
+for layer = 1:6
+	mean_bias_corrected{layer} = bias_data(:,1,layer);
+end
+handles.bias_corrected_mean_epi = mean_bias_corrected;
+handles.subject = subject;
+handles.S = [];
+handles.L = [];
+guidata(hObject,handles);
+L = update_axes(handles);
+handles.L = L;
+guidata(hObject,handles);
 
 
 function subField_Callback(hObject, eventdata, handles)
@@ -486,26 +516,6 @@ function subField_CreateFcn(hObject, eventdata, handles)
 if ispc && isequal(get(hObject,'BackgroundColor'), get(0,'defaultUicontrolBackgroundColor'))
     set(hObject,'BackgroundColor','white');
 end
-
-function update_data_sources(handles)
-    resultsdir = get(handles.resultsdirField,'String');
-    layers = {'1','2','3','4','5','6'};
-    for layer = 1:6
-
-    [handles.BETAS_OPT{layer}, handles.SE_OPT{layer}] = init_fields(resultsdir, '',1:10, layers{layer});
-    [handles.BETAS_IC1{layer}, handles.SE_IC1{layer}] = init_fields(resultsdir, '_IC12',1:10, layers{layer});
-    [handles.BETAS_IC2{layer}, handles.SE_IC2{layer}] = init_fields(resultsdir, '_IC12',11:20, layers{layer});
-
-    end
-    
-    % Load mean bias corrected for each layer
-    bias_struct = matfile(sprintf([resultsdir, '../preprocessVER1SURF%s/meanbiascorrected04.mat'],handles.subject));
-    bias_data = permute(bias_struct.data,[3 1 2]);
-    for layer = 1:6
-        mean_bias_corrected{layer} = bias_data(:,1,layer);
-    end
-    handles.bias_corrected_mean_epi = mean_bias_corrected;
-
 
 % --- Executes on button press in roiButton.
 function roiButton_Callback(hObject, eventdata, handles)
