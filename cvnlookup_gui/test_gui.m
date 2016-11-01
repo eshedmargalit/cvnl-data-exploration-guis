@@ -22,7 +22,7 @@ function varargout = test_gui(varargin)
 
 % Edit the above text to modify the response to help test_gui
 
-% Last Modified by GUIDE v2.5 30-Oct-2016 12:13:36
+% Last Modified by GUIDE v2.5 01-Nov-2016 17:34:46
 
 % Begin initialization code - DO NOT EDIT
 gui_Singleton = 1;
@@ -81,6 +81,7 @@ datadir = resultsdir(1:sep_idx(end-1)-1);
 
 % Get experiment info
 handles.experiment = init_handles.experiment;
+handles.overlayVisibility = 1;
 
 % Preload data from all layers and save it in handles
 h_wait = waitbar(0,'');
@@ -119,7 +120,7 @@ set(handles.threshField,'string',metricmin);
 
 
 % Generate default image (faces tstat layer1 optimized HRF)
-[im, handles.L, handles.S] = makeFigs(handles.subject,handles.BETAS_OPT{1},handles.SE_OPT{1},'tstat','hot',con1,con2,metricmin,metricmax,[],'1', [],'','curv');
+[im, handles.L, handles.S] = makeFigs(handles.subject,handles.BETAS_OPT{1},handles.SE_OPT{1},'tstat','hot',con1,con2,metricmin,metricmax,[],'1', [],'','curv',handles.overlayVisibility);
 
 % Switch focus to brainax, show image
 axes(handles.brainax);
@@ -357,7 +358,7 @@ function L = update_axes(handles)
 	    s = handles.SE_OPT{layerNum};
 	end
 
-	[im, L,~] = makeFigs(sub,b,s,metric,cmap,con1, con2, thresh, tmax, handles.L, handles.layer, handles.S, handles.HRF, bg);
+	[im, L,~] = makeFigs(sub,b,s,metric,cmap,con1, con2, thresh, tmax, handles.L, handles.layer, handles.S, handles.HRF, bg, handles.overlayVisibility);
 
 	axes(handles.brainax);
 	if ~isempty(handles.roi)
@@ -815,3 +816,17 @@ function maingui_CloseRequestFcn(hObject, eventdata, handles)
 
 % Hint: delete(hObject) closes the figure
 delete(hObject);
+
+
+% --- Executes on button press in toggleButton.
+function toggleButton_Callback(hObject, eventdata, handles)
+% hObject    handle to toggleButton (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+if (handles.overlayVisibility == 1)
+	handles.overlayVisibility = 0;
+else
+	handles.overlayVisibility = 1;
+end
+guidata(hObject,handles);
+update_axes(handles);

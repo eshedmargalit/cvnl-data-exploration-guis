@@ -1,4 +1,4 @@
-function [rgbimg, L, S] = makeFigs(sub, betas, se, viewmetric, cmap, con1, con2, metric_min, metric_max, L, layer, S, HRF, bg)
+function [rgbimg, L, S] = makeFigs(sub, betas, se, viewmetric, cmap, con1, con2, metric_min, metric_max, L, layer, S, HRF, bg, overlayVisibility)
 
 % Get correct HRF string for results directory based on input
 if (~isempty(HRF))
@@ -27,7 +27,12 @@ end
 % setup image params
 metric = compute_glm_metric(betas,se,con1,con2,viewmetric,2);
 dataStruct = struct('data',metric,'numlh',numlh,'numrh',numrh);
-thresh = metric > metric_min;
+if overlayVisibility
+	thresh = metric > metric_min;
+else
+	thresh = zeros(length(metric),1);
+end
+	
 clim = [metric_min metric_max];
 
 % draw image and create RGB
