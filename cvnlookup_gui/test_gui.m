@@ -104,10 +104,10 @@ for layer = 1:6
 end
 close(h_wait);
 set(handles.resultsdirField,'String',resultsdir);
-handles.categorynames = get_conditions(handles.experiment);
+[handles.categorynames,handles.categorynamesbase] = get_conditions(handles.experiment);
 handles.contrast = get(init_handles.contrastField,'String');
 set(handles.contrast_post,'String',handles.contrast);
-[con1,con2] = getCon1Con2(handles.contrast);
+[con1,con2] = getCon1Con2(handles.experiment,handles.contrast);
 
 % For layer 1 (the default load) compute t-stat (default metric)
 tstats = compute_glm_metric(handles.BETAS_OPT{1},handles.SE_OPT{1},con1,con2,'tstat',2);
@@ -323,7 +323,7 @@ function L = update_axes(handles)
 	tmax = str2num(get(handles.tmax,'string'));
 
 	contrast = get(handles.contrast_post,'String');
-	[con1,con2] = getCon1Con2(contrast);
+	[con1,con2] = getCon1Con2(handles.experiment,contrast);
 
 	metricNum = get(handles.metricdrop,'Value');
 	metrics = get(handles.metricdrop,'String');
@@ -618,7 +618,7 @@ function analyze_ROI(handles)
 	means = mean(valid_b,1);
 	sems = std(valid_b,[],1)./sqrt(size(valid_b,1));
 
-	categorynames = getFlocCategoryNames('all');
+	categorynames = handles.categorynamesbase;
 	im = createBarFig(means,sems,categorynames);
 
 
@@ -691,7 +691,7 @@ end
 thresh = str2num(get(handles.threshField,'string'));
 
 contrast = get(handles.contrast_post,'String');
-[con1,con2] = getCon1Con2(contrast);
+[con1,con2] = getCon1Con2(handles.experiment,contrast);
 
 metricNum = get(handles.metricdrop,'Value');
 metrics = get(handles.metricdrop,'String');

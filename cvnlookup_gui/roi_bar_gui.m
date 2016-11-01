@@ -108,7 +108,7 @@ valid_se = se(vertmask,:);
 
 means = mean(valid_b,1);
 sems = mean(valid_se,1);
-categorynames = getFlocCategoryNames('all');
+categorynames = hdata.categorynamesbase;
 
 % Update internal data fields
 handles.vertmask = vertmask;
@@ -188,7 +188,7 @@ function update_axes(handles)
 	means = mean(valid_b,1);
 	sems = mean(valid_se,1);
 
-	categorynames = getFlocCategoryNames('all');
+	categorynames = hdata.categorynamesbase;
 	populateBars(means,sems,categorynames,handles);
 
 function populateBars(means,sems,names,handles)
