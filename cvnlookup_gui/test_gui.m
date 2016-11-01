@@ -517,6 +517,11 @@ set(handles.threshField,'string',metricmin);
 % Load mean bias corrected for each layer
 sep_idx = strfind(resultsdir,'/');
 datadir = resultsdir(1:sep_idx(end-1)-1);
+[handles.experiment, default_contrast] = data_dir_to_experiment(datadir);
+set(handles.contrast_post,'String',default_contrast);
+[handles.categorynames,handles.categorynamesbase] = get_conditions(handles.experiment);
+
+
 bias_struct = matfile(sprintf([datadir, '/preprocessVER1SURF%s/meanbiascorrected04.mat'],subject));
 bias_data = permute(bias_struct.data,[3 1 2]);
 for layer = 1:6
