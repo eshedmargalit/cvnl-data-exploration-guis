@@ -3,12 +3,12 @@ function [con1,con2] = getCon1Con2(experiment,inputStr)
 %	inputStr like 'faces_placesVSall', or 'R30_R60VSL30_L60'
 %	experiment like 'floc'
 
-strparts = split(inputStr,'VS');
+strparts = strsplit(inputStr,'VS');
 con1str = strparts{1};
 con2str = strparts{2};
 
-con1strs = split(con1str,'_');
-con2strs = split(con2str,'_');
+con1strs = strsplit(con1str,'_');
+con2strs = strsplit(con2str,'_');
 
 con1 = [];
 con2 = [];
