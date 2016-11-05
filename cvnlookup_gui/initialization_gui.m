@@ -54,7 +54,7 @@ function initialization_gui_OpeningFcn(hObject, eventdata, handles, varargin)
 
 % Choose default command line output for initialization_gui
 handles.output = hObject;
-
+handles.experiment = 'floc';
 % Update handles structure
 guidata(hObject, handles);
 
@@ -103,7 +103,10 @@ function browseButton_Callback(hObject, eventdata, handles)
 % handles    structure with handles and user data (see GUIDATA)
 str = uigetdir(cvnpath('fmridata'),'Choose GLM Results folder');
 set(handles.resultsdirField, 'String', str);
-
+[handles.experiment, handles.default_contrast] = data_dir_to_experiment(str);
+set(handles.contrastField,'String',handles.default_contrast);
+set(handles.experimentSelector,'String',handles.experiment);
+guidata(hObject,handles);
 
 
 function contrastField_Callback(hObject, eventdata, handles)
@@ -150,6 +153,7 @@ if (iscell(experiments))
 else
 	handles.experiment = experiments;
 end
+
 guidata(hObject,handles);
 
 % --- Executes during object creation, after setting all properties.
@@ -163,14 +167,7 @@ function experimentSelector_CreateFcn(hObject, eventdata, handles)
 if ispc && isequal(get(hObject,'BackgroundColor'), get(0,'defaultUicontrolBackgroundColor'))
     set(hObject,'BackgroundColor','white');
 end
-experiments = get(hObject,'String');
-if (iscell(experiments))
-	handles.experiment = experiments{1};
-else
-	handles.experiment = experiments;
-end
-guidata(hObject,handles);
-
+set(hObject,'String','floc');
 
 function update_contrast(hObject,eventdata,x,contrast,handles)
 	handles.contrast = contrast;
@@ -181,5 +178,6 @@ function launchButton_Callback(hObject, eventdata, handles)
 % hObject    handle to launchButton (see GCBO)
 % eventdata  reserved - to be defined in a future version of MATLAB
 % handles    structure with handles and user data (see GUIDATA)
+
 test_gui
 close(get(hObject,'Parent'));
