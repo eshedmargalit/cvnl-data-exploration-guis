@@ -589,6 +589,11 @@ axes(handles.brainax);
 % draw ROI
 [r, x, y] = roipoly();
 handles.roi = r;
+
+% pull vertices from ROI
+verticesStruct = spherelookup_image2vert(handles.roi,handles.L);
+handles.roi_vertices = verticesStruct.data;
+
 handles.roix = x;
 handles.roiy = y;
 guidata(hObject,handles);
@@ -734,6 +739,7 @@ function saveroiButton_Callback(hObject, eventdata, handles)
 % eventdata  reserved - to be defined in a future version of MATLAB
 % handles    structure with handles and user data (see GUIDATA)
 roi = handles.roi;
+vertices = handles.roi_vertices;
 roix = handles.roix;
 roiy = handles.roiy;
 perim = handles.perim;
@@ -742,7 +748,7 @@ mkdirquiet(sub_path);
 [sfile,spath] = uiputfile([sub_path, '/*.mat'],'Save ROI');
 outname = [spath sfile];
 if (sfile)
-	save(outname,'roi','roix','roiy','perim');
+	save(outname,'roi','vertices','roix','roiy','perim');
 end
 
 
