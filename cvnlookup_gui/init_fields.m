@@ -1,11 +1,9 @@
 function [betas, se, subject] = init_fields(resultsdir,hrfstr,regressor_range,layer)
 
 	a1 = matfile(sprintf([resultsdir '/layer%s.mat'],layer));
-	md = a1.modelmd;
+	betas = a1.modelmd;
 	reps_per_run = a1.reps_per_run;
 	subject = a1.FSID;
-
-	betas = md{2}; %V x 10
 
 	[betas, se] = compress_condition_split(betas,reps_per_run);
 	betas = betas(:,regressor_range);
