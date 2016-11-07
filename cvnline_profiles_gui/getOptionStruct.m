@@ -10,10 +10,10 @@ function optionStruct = getOptionsStruct()
 	optionStruct.viewmetric = 'tstat';
 	optionStruct.viewcat = 'faces';
 	optionStruct.plotmetric = 'beta';
-	optionStruct.line_length = [100 100];
-	optionStruct.line_spacing = [2 2];
+	optionStruct.line_length = [180 400];
+	optionStruct.line_spacing = [1 1];
 	optionStruct.lrdirection = 'l2r';
 	optionStruct.uddirection = 'u2d';
-	optionStruct.nSteps = [50 50];
+	optionStruct.nSteps = [400 180];
 	optionStruct.movementDirection = {'d','r'};
 end

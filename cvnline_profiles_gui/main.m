@@ -55,7 +55,7 @@ end %end while
 
 %% Save grid image
 % Where should figure be saved to?
-figDir = sprintf('/home/stone/eshed/line_profiles/figs/%s',hemi);
+figDir = sprintf('/home/stone/eshed/cvnl_data_exploration_guis/cvnline_profiles_gui/figs/%s',hemi);
 mkdirquiet(figDir);
 outname = sprintf('%s/grid.png',figDir);
 imwrite(gridimg,outname);
@@ -149,7 +149,7 @@ function LRLines(hemi,x,y,xypoints,line_length,line_spacing,lrdirection,plotmetr
 	xyline = int16([(x1:x2)' , repmat(y,[line_length+1,1 ])]);
 
 	% Where should figure be saved to?
-	figDir = sprintf('/home/stone/eshed/line_profiles/figs/%s/%s',hemi,lrdirection);
+	figDir = sprintf('/home/stone/eshed/cvnl_data_exploration_guis/cvnline_profiles_gui/figs/%s/%s',hemi,lrdirection);
 	mkdirquiet(figDir);
 
 	% define xypoints as [x1 y1;x2 y2] (is this right?)
@@ -247,7 +247,7 @@ function UDLines(hemi,x,y,xypoints,line_length,line_spacing,uddirection,plotmetr
 	xyline = int16([repmat(x,[line_length+1,1]), (y1:y2)']);
 
 	% Where should figure be saved to?
-	figDir = sprintf('/home/stone/eshed/line_profiles/figs/%s/%s',hemi,uddirection);
+	figDir = sprintf('/home/stone/eshed/cvnl_data_exploration_guis/cvnline_profiles_gui/figs/%s/%s',hemi,uddirection);
 	mkdirquiet(figDir);
 
 	% define xypoints as [x1 y1;x2 y2] (is this right?)

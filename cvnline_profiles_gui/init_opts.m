@@ -144,28 +144,28 @@ layeric=[];
 % Clear up memory
 clear modelmd modelse modelmd_even modelmd_odd modelse_even modelse_odd 
 
-%% Pull ICA fits for each layer
-
-modelic={};
-for i = 1:numel(layers)
-    % Grab filename
-    icfile = sprintf('%s/icafit_results_FIR_layer%d.mat',resultdir,layers(i));
-    if(~exist(icfile,'file'))
-        break;
-    end
-
-    % Read in file
-    I = matfile(icfile);
-
-    % Get the model data for that layer
-    modelic{i} = I.modeldata(:,:,1:5);
-end
-
-% Get the HRF independent components (what is this?)
-hrfic = I.hrf;
-layeric = permute(cat(4,modelic{:}),[1 2 4 3]);
-
-clear modelic;
+%%% Pull ICA fits for each layer
+%
+%modelic={};
+%for i = 1:numel(layers)
+%    % Grab filename
+%    icfile = sprintf('%s/icafit_results_FIR_layer%d.mat',resultdir,layers(i));
+%    if(~exist(icfile,'file'))
+%        break;
+%    end
+%
+%    % Read in file
+%    I = matfile(icfile);
+%
+%    % Get the model data for that layer
+%    modelic{i} = I.modeldata(:,:,1:5);
+%end
+%
+%% Get the HRF independent components (what is this?)
+%hrfic = I.hrf;
+%layeric = permute(cat(4,modelic{:}),[1 2 4 3]);
+%
+%clear modelic;
 
 %% Populate beta_opts
 % Set TR and error to be graphed (se = standard error)
