@@ -93,14 +93,16 @@ for layer = 1:6
 	waitbar(idx/total_loads, h_wait, sprintf('Loading Layer %.0f, Canonical HRF',layer));
 	idx = idx + 1;
 	[handles.BETAS_OPT{layer}, handles.SE_OPT{layer}, handles.subject] = init_fields(resultsdir, '',1:10, layers{layer});
-
 	waitbar(idx/total_loads, h_wait, sprintf('Loading Layer %.0f, IC1',layer));
 	idx = idx + 1;
-	[handles.BETAS_IC1{layer}, handles.SE_IC1{layer},~] = init_fields(resultsdir, '_IC12',1:10, layers{layer});
+	handles.BETAS_IC1{layer} = handles.BETAS_OPT{layer};
+	handles.SE_IC1{layer} = handles.SE_OPT{layer};
+	%[handles.BETAS_IC1{layer}, handles.SE_IC1{layer},~] = init_fields(resultsdir, '_IC12',1:10, layers{layer});
 
 	waitbar(idx/total_loads, h_wait, sprintf('Loading Layer %.0f, IC2',layer));
 	idx = idx + 1;
-	[handles.BETAS_IC2{layer}, handles.SE_IC2{layer},~] = init_fields(resultsdir, '_IC12',1:10, layers{layer});
+	handles.BETAS_IC2{layer} = handles.BETAS_OPT{layer};
+	handles.SE_IC2{layer} = handles.SE_OPT{layer};
 	%[handles.BETAS_IC2{layer}, handles.SE_IC2{layer}] = init_fields(resultsdir, '_IC12',11:20, layers{layer});
 end
 close(h_wait);
@@ -499,11 +501,14 @@ for layer = 1:6
 
 	waitbar(idx/total_loads, h, sprintf('Loading Layer %.0f, IC1',layer));
 	idx = idx + 1;
-	[handles.BETAS_IC1{layer}, handles.SE_IC1{layer},~] = init_fields(resultsdir, '_IC12',1:10, layers{layer});
+	handles.BETAS_IC1{layer} = handles.BETAS_OPT{layer};
+	handles.SE_IC1{layer} = handles.SE_OPT{layer};
+	%[handles.BETAS_IC1{layer}, handles.SE_IC1{layer},~] = init_fields(resultsdir, '_IC12',1:10, layers{layer});
 
 	waitbar(idx/total_loads, h, sprintf('Loading Layer %.0f, IC2',layer));
 	idx = idx + 1;
-	[handles.BETAS_IC2{layer}, handles.SE_IC2{layer},~] = init_fields(resultsdir, '_IC12',1:10, layers{layer});
+	handles.BETAS_IC2{layer} = handles.BETAS_OPT{layer};
+	handles.SE_IC2{layer} = handles.SE_OPT{layer};
 	%[handles.BETAS_IC2{layer}, handles.SE_IC2{layer}] = init_fields(resultsdir, '_IC12',11:20, layers{layer});
 end
 close(h);
