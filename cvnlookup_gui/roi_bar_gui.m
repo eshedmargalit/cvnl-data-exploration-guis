@@ -81,6 +81,8 @@ switch layer
         set(handles.radio5,'Value',1);
     case 6
         set(handles.radio6,'Value',1);
+    case 7
+	set(handles.radio7,'Value',1);
 end
     
 % pull vertices from ROI
@@ -137,7 +139,7 @@ function ylims = get_ylims(hdata)
 	maxVal = -1000;
 	minVal = 1000;
 	hrf_strs = {'BETAS_OPT','BETAS_IC1','BETAS_IC2'};
-	for layer = 1:6
+	for layer = 1:7
 		for hrf = 1:3
 		
 			betas = hdata.(hrf_strs{hrf}){layer};

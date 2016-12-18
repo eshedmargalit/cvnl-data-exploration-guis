@@ -1,4 +1,4 @@
-function [rgbimg, L, S] = makeFigs(sub, betas, se, viewmetric, cmap, con1, con2, metric_min, metric_max, L, layer, S, HRF, bg, overlayVisibility)
+function [rgbimg, L, S] = makeFigs(sub, betas, se, viewmetric, cmap, con1, con2, metric_min, metric_max, L, S, HRF, bg, overlayVisibility)
 
 % Get correct HRF string for results directory based on input
 if (~isempty(HRF))

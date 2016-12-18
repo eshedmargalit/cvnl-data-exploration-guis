@@ -65,12 +65,12 @@ guidata(hObject, handles);
 %-----------------------%
 
 % set up empty cells (one for each layer) for betas and se for each of the three HRFs
-handles.BETAS_OPT = cell(6,1);
-handles.SE_OPT = cell(6,1);
-handles.BETAS_IC1 = cell(6,1);
-handles.SE_IC1 = cell(6,1);
-handles.BETAS_IC2 = cell(6,1);
-handles.SE_IC2 = cell(6,1);
+handles.BETAS_OPT = cell(7,1);
+handles.SE_OPT = cell(7,1);
+handles.BETAS_IC1 = cell(7,1);
+handles.SE_IC1 = cell(7,1);
+handles.BETAS_IC2 = cell(7,1);
+handles.SE_IC2 = cell(7,1);
 
 % get the data directory, results directory, and subject ID (freesurfer) from the init gui
 h = findobj('Tag','init_gui');
@@ -85,11 +85,11 @@ handles.overlayVisibility = 1;
 
 % Preload data from all layers and save it in handles
 h_wait = waitbar(0,'');
-layers = {'1','2','3','4','5','6'};
+layers = {'1','2','3','4','5','6','mean'};
 
-total_loads = 18;
+total_loads = 21;
 idx = 1;
-for layer = 1:6
+for layer = 1:7
 	waitbar(idx/total_loads, h_wait, sprintf('Loading Layer %.0f, Canonical HRF',layer));
 	idx = idx + 1;
 	[handles.BETAS_OPT{layer}, handles.SE_OPT{layer}, handles.subject] = init_fields(resultsdir, '',1:10, layers{layer});
@@ -122,7 +122,7 @@ set(handles.threshField,'string',metricmin);
 
 
 % Generate default image (faces tstat layer1 optimized HRF)
-[im, handles.L, handles.S] = makeFigs(handles.subject,handles.BETAS_OPT{1},handles.SE_OPT{1},'tstat','hot',con1,con2,metricmin,metricmax,[],'1', [],'','curv',handles.overlayVisibility);
+[im, handles.L, handles.S] = makeFigs(handles.subject,handles.BETAS_OPT{1},handles.SE_OPT{1},'tstat','hot',con1,con2,metricmin,metricmax,[], [],'','curv',handles.overlayVisibility);
 
 % Switch focus to brainax, show image
 axes(handles.brainax);
@@ -151,6 +151,9 @@ bias_data = permute(bias_struct.data,[3 1 2]);
 for layer = 1:6
     mean_bias_corrected{layer} = bias_data(:,1,layer);
 end
+
+% Manually set bias corrected for layer mean
+mean_bias_corrected{7} = mean(bias_data(:,1,:),3);
 handles.bias_corrected_mean_epi = mean_bias_corrected;
 
 % Update handles var for later use
@@ -360,7 +363,7 @@ function L = update_axes(handles)
 	    s = handles.SE_OPT{layerNum};
 	end
 
-	[im, L,~] = makeFigs(sub,b,s,metric,cmap,con1, con2, thresh, tmax, handles.L, handles.layer, handles.S, handles.HRF, bg, handles.overlayVisibility);
+	[im, L,~] = makeFigs(sub,b,s,metric,cmap,con1, con2, thresh, tmax, handles.L, handles.S, handles.HRF, bg, handles.overlayVisibility);
 
 	axes(handles.brainax);
 	if ~isempty(handles.roi)
@@ -489,11 +492,11 @@ resultsdir = get(handles.resultsdirField,'String');
 
 % Load in data, use waitbar
 h = waitbar(0,'');
-layers = {'1','2','3','4','5','6'};
+layers = {'1','2','3','4','5','6','mean'};
 
-total_loads = 18;
+total_loads = 21;
 idx = 1;
-for layer = 1:6
+for layer = 1:7
 	
 	waitbar(idx/total_loads, h, sprintf('Loading Layer %.0f, Canonical HRF',layer));
 	idx = idx + 1;
@@ -532,6 +535,9 @@ bias_data = permute(bias_struct.data,[3 1 2]);
 for layer = 1:6
 	mean_bias_corrected{layer} = bias_data(:,1,layer);
 end
+
+% Manually set bias corrected for layer mean
+mean_bias_corrected{7} = mean(bias_data(:,1,:),3);
 handles.bias_corrected_mean_epi = mean_bias_corrected;
 handles.subject = subject;
 
