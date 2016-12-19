@@ -754,7 +754,8 @@ vertices = handles.roi_vertices;
 roix = handles.roix;
 roiy = handles.roiy;
 perim = handles.perim;
-sub_path = sprintf('ROIs/%s',handles.subject);
+resultsdir = get(handles.resultsdirField,'String');
+sub_path = sprintf('%s/../ROIs',resultsdir);
 mkdirquiet(sub_path);
 [sfile,spath] = uiputfile([sub_path, '/*.mat'],'Save ROI');
 outname = [spath sfile];
@@ -776,7 +777,8 @@ function roiloadbutton_Callback(hObject, eventdata, handles)
 % hObject    handle to roiloadbutton (see GCBO)
 % eventdata  reserved - to be defined in a future version of MATLAB
 % handles    structure with handles and user data (see GUIDATA)
-sub_path = sprintf('ROIs/%s',handles.subject);
+resultsdir = get(handles.resultsdirField,'String');
+sub_path = sprintf('%s/../ROIs',resultsdir);
 [fname,pathname] = uigetfile([sub_path,'/*.mat'],'Load ROI');
 if (fname)
 	x = load([pathname,fname]);
