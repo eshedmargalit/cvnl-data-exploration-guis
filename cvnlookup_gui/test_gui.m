@@ -732,6 +732,11 @@ handles.roi = overlap;
 handles.perim = bwperim(overlap);
 handles.roix = [];
 handles.roiy = [];
+
+% update handles.roi_vertices
+verticesStruct = spherelookup_image2vert(handles.roi,handles.L);
+handles.roi_vertices = verticesStruct.data;
+
 guidata(hObject,handles);
 update_axes(handles);
 
