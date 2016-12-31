@@ -1,9 +1,9 @@
-function [con1,con2] = getCon1Con2(experiment,inputStr)
+function [con1,con2] = get_con1_con2(experiment,input_str)
 % INPUTS
-%	inputStr like 'faces_placesVSall', or 'R30_R60VSL30_L60'
+%	input_str like 'faces_placesVSall', or 'R30_R60VSL30_L60'
 %	experiment like 'floc'
 
-strparts = strsplit(inputStr,'VS');
+strparts = strsplit(input_str,'VS');
 con1str = strparts{1};
 con2str = strparts{2};
 
@@ -14,11 +14,11 @@ con1 = [];
 con2 = [];
 
 for i =1:numel(con1strs)
-	con1 = [con1 getCon(experiment,con1strs{i})];
+	con1 = [con1 get_con(experiment,con1strs{i})];
 end
 
 for i =1:numel(con2strs)
-	con2 = [con2 getCon(experiment,con2strs{i})];
+	con2 = [con2 get_con(experiment,con2strs{i})];
 end
 
 % get rid of duplicates in con2
@@ -28,17 +28,17 @@ con2 = setdiff(con2,con1);
 
 end
 
-function con = getCon(experiment, contrastName)
-	contrastName = lower(contrastName);
+function con = get_con(experiment, contrast_name)
+	contrast_name = lower(contrast_name);
 
 	switch experiment
 		case 'floc'
-			if (strcmp(contrastName,'all'))
+			if (strcmp(contrast_name,'all'))
 				con = 1:10;
 				return;
 			end
 
-			switch contrastName
+			switch contrast_name
 				case 'characters'
 					con = [1 2];
 				case 'bodies'
@@ -70,15 +70,15 @@ function con = getCon(experiment, contrastName)
 				case 'instrument'
 					con = [10];
 				otherwise
-					error(sprintf('%s not recognized. Please choose from:\ncharacters\nbodies\nfaces\nplaces\nobjects\nword\nnumber\nbody\nlimb\nadult\nchild\ncorridor\nhouse\ncar\ninstrument',contrastName));
+					error(sprintf('%s not recognized. Please choose from:\ncharacters\nbodies\nfaces\nplaces\nobjects\nword\nnumber\nbody\nlimb\nadult\nchild\ncorridor\nhouse\ncar\ninstrument',contrast_name));
 			end
 		case 'C11'
-			if (strcmp(contrastName,'all'))
+			if (strcmp(contrast_name,'all'))
 				con = 1:10;
 				return;
 			end
 
-			switch contrastName
+			switch contrast_name
 				case 'right'
 					con = [1 2 3 4];
 				case 'left'
@@ -104,7 +104,7 @@ function con = getCon(experiment, contrastName)
 				case 'back'
 					con = [10];
 				otherwise
-					error(sprintf('%s not recognized. Please choose from:\nright\nleft\nr30\nr60\nr90\nr120\nl30\nl60\nl90\nl120\nfront\nback\n',contrastName));
+					error(sprintf('%s not recognized. Please choose from:\nright\nleft\nr30\nr60\nr90\nr120\nl30\nl60\nl90\nl120\nfront\nback\n',contrast_name));
 			end
 		otherwise
 	end	

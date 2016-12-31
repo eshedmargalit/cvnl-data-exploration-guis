@@ -65,6 +65,7 @@ guidata(hObject, handles);
 %-----------------------%
 
 % set up empty cells (one for each layer) for betas and se for each of the three HRFs
+% layermean (average of preprocessed timeseries across layers) is treated as layer 7
 handles.BETAS_OPT = cell(7,1);
 handles.SE_OPT = cell(7,1);
 handles.BETAS_IC1 = cell(7,1);
@@ -84,21 +85,26 @@ handles.experiment = init_handles.experiment;
 handles.overlayVisibility = 1;
 
 % Preload data from all layers and save it in handles
+% Right now "IC1" and "IC2" just duplicate the canconical HRF results, but this can be modified to accept other results directories for comparison
 h_wait = waitbar(0,'');
 layers = {'1','2','3','4','5','6','mean'};
 
 total_loads = 21;
 idx = 1;
 for layer = 1:7
+	% load canonical HRF results
 	waitbar(idx/total_loads, h_wait, sprintf('Loading Layer %.0f, Canonical HRF',layer));
 	idx = idx + 1;
 	[handles.BETAS_OPT{layer}, handles.SE_OPT{layer}, handles.subject] = init_fields(resultsdir, '',1:10, layers{layer});
+
+	% load IC1 results (or copy from canonical for now)
 	waitbar(idx/total_loads, h_wait, sprintf('Loading Layer %.0f, IC1',layer));
 	idx = idx + 1;
 	handles.BETAS_IC1{layer} = handles.BETAS_OPT{layer};
 	handles.SE_IC1{layer} = handles.SE_OPT{layer};
 	%[handles.BETAS_IC1{layer}, handles.SE_IC1{layer},~] = init_fields(resultsdir, '_IC12',1:10, layers{layer});
 
+	% load IC2 results (or copy from canonical for now)
 	waitbar(idx/total_loads, h_wait, sprintf('Loading Layer %.0f, IC2',layer));
 	idx = idx + 1;
 	handles.BETAS_IC2{layer} = handles.BETAS_OPT{layer};
@@ -106,11 +112,13 @@ for layer = 1:7
 	%[handles.BETAS_IC2{layer}, handles.SE_IC2{layer}] = init_fields(resultsdir, '_IC12',11:20, layers{layer});
 end
 close(h_wait);
+
+% populate various gui fields
 set(handles.resultsdirField,'String',resultsdir);
 [handles.categorynames,handles.categorynamesbase] = get_conditions(handles.experiment);
 handles.contrast = get(init_handles.contrastField,'String');
 set(handles.contrast_post,'String',handles.contrast);
-[con1,con2] = getCon1Con2(handles.experiment,handles.contrast);
+[con1,con2] = get_con1_con2(handles.experiment,handles.contrast);
 
 % For layer 1 (the default load) compute t-stat (default metric)
 tstats = compute_glm_metric(handles.BETAS_OPT{1},handles.SE_OPT{1},con1,con2,'tstat',2);
@@ -121,8 +129,8 @@ set(handles.tmax,'string',metricmax);
 set(handles.threshField,'string',metricmin);
 
 
-% Generate default image (faces tstat layer1 optimized HRF)
-[im, handles.L, handles.S] = makeFigs(handles.subject,handles.BETAS_OPT{1},handles.SE_OPT{1},'tstat','hot',con1,con2,metricmin,metricmax,[], [],'','curv',handles.overlayVisibility);
+% Generate default image (faces tstat layer1 canonical HRF)
+[im, handles.L, handles.S] = make_figs(handles.subject,handles.BETAS_OPT{1},handles.SE_OPT{1},'tstat','hot',con1,con2,metricmin,metricmax,[], [],'','curv',handles.overlayVisibility);
 
 % Switch focus to brainax, show image
 axes(handles.brainax);
@@ -329,7 +337,7 @@ function L = update_axes(handles)
 	tmax = str2num(get(handles.tmax,'string'));
 
 	contrast = get(handles.contrast_post,'String');
-	[con1,con2] = getCon1Con2(handles.experiment,contrast);
+	[con1,con2] = get_con1_con2(handles.experiment,contrast);
 
 	metricNum = get(handles.metricdrop,'Value');
 	metrics = get(handles.metricdrop,'String');
@@ -363,7 +371,7 @@ function L = update_axes(handles)
 	    s = handles.SE_OPT{layerNum};
 	end
 
-	[im, L,~] = makeFigs(sub,b,s,metric,cmap,con1, con2, thresh, tmax, handles.L, handles.S, handles.HRF, bg, handles.overlayVisibility);
+	[im, L,~] = make_figs(sub,b,s,metric,cmap,con1, con2, thresh, tmax, handles.L, handles.S, handles.HRF, bg, handles.overlayVisibility);
 
 	axes(handles.brainax);
 	if ~isempty(handles.roi)
@@ -641,7 +649,7 @@ function analyze_ROI(handles)
 	sems = std(valid_b,[],1)./sqrt(size(valid_b,1));
 
 	categorynames = handles.categorynamesbase;
-	im = createBarFig(means,sems,categorynames);
+	im = create_bar_fig(means,sems,categorynames);
 
 
 % --- Executes on button press in analyzeroiButton.
@@ -713,13 +721,13 @@ end
 thresh = str2num(get(handles.threshField,'string'));
 
 contrast = get(handles.contrast_post,'String');
-[con1,con2] = getCon1Con2(handles.experiment,contrast);
+[con1,con2] = get_con1_con2(handles.experiment,contrast);
 
 metricNum = get(handles.metricdrop,'Value');
 metrics = get(handles.metricdrop,'String');
 metric = metrics{metricNum};
 
-valid_func_vertices = getValidFuncVertices(b,se,metric,con1,con2,thresh);
+valid_func_vertices = get_valid_func_vertices(b,se,metric,con1,con2,thresh);
 
 rL = handles.L{1};
 lL = handles.L{2};
