@@ -22,7 +22,7 @@ function varargout = test_gui(varargin)
 
 % Edit the above text to modify the response to help test_gui
 
-% Last Modified by GUIDE v2.5 01-Nov-2016 17:34:46
+% Last Modified by GUIDE v2.5 21-Aug-2017 20:42:53
 
 % Begin initialization code - DO NOT EDIT
 gui_Singleton = 1;
@@ -129,12 +129,12 @@ set(handles.tmax,'string',metricmax);
 set(handles.threshField,'string',metricmin);
 
 % Generate default image (faces tstat layer1 canonical HRF)
-handles.viewNum = 11;
+viewNum = 1;
 handles.L = [];
 [im, handles.L] = make_figs(handles.subject,...
 	handles.BETAS_OPT{1},handles.SE_OPT{1},'tstat','hot',con1,con2,...
 	metricmin,metricmax, handles.L,'','curv',...
-	handles.overlayVisibility,handles.viewNum); % view 11 is VTC flatpatch
+	handles.overlayVisibility,viewNum); % view 11 is VTC flatpatch
 
 % Switch focus to brainax, show image
 axes(handles.brainax);
@@ -351,6 +351,8 @@ function L = update_axes(handles)
 	colormaps = get(handles.colordrop,'String');
 	cmap = colormaps{colormapNum};
 
+	viewNum = get(handles.popupmenu6,'Value');
+
    	layerNum = str2num(handles.layer);
     
 	backgroundNum = get(handles.backgroundDrop,'Value');
@@ -376,8 +378,8 @@ function L = update_axes(handles)
 	end
 
 	[im, L] = make_figs(sub,b,s,metric,cmap,con1, con2, thresh, tmax,...
-		 handles.L, handles.HRF, bg, handles.overlayVisibility,...
-		 handles.viewNum);
+		 [], handles.HRF, bg, handles.overlayVisibility,...
+		 viewNum);
 
 	axes(handles.brainax);
 	if ~isempty(handles.roi)
@@ -873,3 +875,27 @@ else
 end
 guidata(hObject,handles);
 update_axes(handles);
+
+
+% --- Executes on selection change in popupmenu6.
+function popupmenu6_Callback(hObject, eventdata, handles)
+% hObject    handle to popupmenu6 (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+
+% Hints: contents = cellstr(get(hObject,'String')) returns popupmenu6 contents as cell array
+%        contents{get(hObject,'Value')} returns selected item from popupmenu6
+update_axes(handles);
+
+
+% --- Executes during object creation, after setting all properties.
+function popupmenu6_CreateFcn(hObject, eventdata, handles)
+% hObject    handle to popupmenu6 (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    empty - handles not created until after all CreateFcns called
+
+% Hint: popupmenu controls usually have a white background on Windows.
+%       See ISPC and COMPUTER.
+if ispc && isequal(get(hObject,'BackgroundColor'), get(0,'defaultUicontrolBackgroundColor'))
+    set(hObject,'BackgroundColor','white');
+end
