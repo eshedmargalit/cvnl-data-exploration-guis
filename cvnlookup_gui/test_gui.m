@@ -128,9 +128,13 @@ metricmin = min(tstats);
 set(handles.tmax,'string',metricmax);
 set(handles.threshField,'string',metricmin);
 
-
 % Generate default image (faces tstat layer1 canonical HRF)
-[im, handles.L, handles.S] = make_figs(handles.subject,handles.BETAS_OPT{1},handles.SE_OPT{1},'tstat','hot',con1,con2,metricmin,metricmax,[], [],'','curv',handles.overlayVisibility);
+handles.viewNum = 11;
+handles.L = [];
+[im, handles.L] = make_figs(handles.subject,...
+	handles.BETAS_OPT{1},handles.SE_OPT{1},'tstat','hot',con1,con2,...
+	metricmin,metricmax, handles.L,'','curv',...
+	handles.overlayVisibility,handles.viewNum); % view 11 is VTC flatpatch
 
 % Switch focus to brainax, show image
 axes(handles.brainax);
@@ -371,7 +375,9 @@ function L = update_axes(handles)
 	    s = handles.SE_OPT{layerNum};
 	end
 
-	[im, L,~] = make_figs(sub,b,s,metric,cmap,con1, con2, thresh, tmax, handles.L, handles.S, handles.HRF, bg, handles.overlayVisibility);
+	[im, L] = make_figs(sub,b,s,metric,cmap,con1, con2, thresh, tmax,...
+		 handles.L, handles.HRF, bg, handles.overlayVisibility,...
+		 handles.viewNum);
 
 	axes(handles.brainax);
 	if ~isempty(handles.roi)
