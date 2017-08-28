@@ -95,7 +95,7 @@ for layer = 1:7
 	% load canonical HRF results
 	waitbar(idx/total_loads, h_wait, sprintf('Loading Layer %.0f, Canonical HRF',layer));
 	idx = idx + 1;
-	[handles.BETAS_OPT{layer}, handles.SE_OPT{layer}, handles.subject] = init_fields(resultsdir, '',1:10, layers{layer});
+	[handles.BETAS_OPT{layer}, handles.SE_OPT{layer}, handles.subject] = init_fields(resultsdir, '', layers{layer});
 
 	% load IC1 results (or copy from canonical for now)
 	waitbar(idx/total_loads, h_wait, sprintf('Loading Layer %.0f, IC1',layer));
@@ -516,7 +516,7 @@ for layer = 1:7
 	
 	waitbar(idx/total_loads, h, sprintf('Loading Layer %.0f, Canonical HRF',layer));
 	idx = idx + 1;
-	[handles.BETAS_OPT{layer}, handles.SE_OPT{layer}, subject] = init_fields(resultsdir, '',1:10, layers{layer});
+	[handles.BETAS_OPT{layer}, handles.SE_OPT{layer}, subject] = init_fields(resultsdir, '', layers{layer});
 
 	waitbar(idx/total_loads, h, sprintf('Loading Layer %.0f, IC1',layer));
 	idx = idx + 1;
