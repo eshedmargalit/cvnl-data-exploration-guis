@@ -139,6 +139,7 @@ handles.L = [];
 % Switch focus to brainax, show image
 axes(handles.brainax);
 imshow(im);
+brighten(0.5);
 hold on;
 
 % Create colorbar (default is hot) with 100 colors
@@ -398,6 +399,7 @@ function L = update_axes(handles)
 		end
 	end
 	imshow(im);
+	brighten(0.5);
 	hold on;
 	% if roi exists but the perimeter hasn't been set (i.e., no shrinkwrapping) then draw bounding box
 	if ~isempty(handles.roi) && isempty(handles.perim)
